@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    
+<canvas id="canvas" width="300" height="300"></canvas>
+<script type="importmap">
+    {
+        "imports" : {
+            "three" : "https://unpkg.com/three@0.141.0/build/three.module.js",
+            "GLTFLoader" : "https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js"
+        }
+    }
+</script>
+<script type="module">
+    import {GLTFLoader} from 'GLTFLoader';
+    import * as THREE from 'three';
+
+    import {
+        OrbitControls
+    } from 'three/examples/jsm/controls/OrbitControls.js';
+
+    let scene = new THREE.Scene();
+    let renderer = new THREE.WebGLRenderer({
+        canvas : document.querySelector('#canvas'),
+        antialias : true    //매끄럽게 동작
+    });
+    renderer.outputEncoding = THREE.sRGBEncoding;   //색상변경  
+
+    //카메라 소환
+    // -PerspectiveCamera(원근법 적용) & -OrthographicCamera(원근법x)
+    let camera = new THREE.PerspectiveCamera(30,1);
+    camera.position.set(0,0,5)
+
+    scene.background = new THREE.Color('white');    //배경
+    let light = new THREE.DirectionalLight(0xffff00,10);    //조명
+    scene.add(light);
+
+    // GLTF 파일 가져오는 법
+    let loader = new GLTFLoader();
+    loader.load('shiba/scene.gltf', function(gltf) { //gltf -> 개가 들어있음
+        scene.add(gltf.scene);
+        renderer.render(scene, camera)
+        //애니메이션
+        function animate() {
+            requestAnimationFrame(animate)
+            // gltf.scene.rotation.y -=0.01
+            // gltf.scene.rotation.x -=0.01
+            renderer.render(scene,camera);
+        }
+        animate()
+    });
+    //3D model 보여줄대 필요한 것들
+    // 1. 카메라, 2.조명 3.배경
+
+    //마우스 컨트롤 - Three.js 내의 OrbitControl 가져다가 사용
+
+
+</script>
+</body>
+</html>
