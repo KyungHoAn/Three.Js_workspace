@@ -13,16 +13,20 @@ if (WEBGL.isWebGLAvailable()) {
 
   //카메라
   const fov = 80;
-  const aspect = window.innerWidth / window.innerHeight;
+  const aspect = window.innerWidth / window.innerHeight;  //종횡비 - 가로 세로 비율
   const near = 0.1;
   const far = 600;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 //   const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);  
 //   camera.position.z = 3;
-    camera.position.set(0,0.1);
+    // camera.position.set(0,0.1);
+    camera.position.x = 0;
+    camera.position.y = 0;
+    camera.position.z = 1;
+    camera.lookAt(new THREE.Vector3(0,0,0));
 
   //캔버스
-  const canvas = document.querySelector('#ex-03');
+  // const canvas = document.querySelector('#ex-03');
   
   //렌더러
   const renderer = new THREE.WebGLRenderer({
@@ -34,7 +38,7 @@ if (WEBGL.isWebGLAvailable()) {
   document.body.appendChild(renderer.domElement);
 
   //빛
-  const pointLight = new THREE.PointLight(0xffffff, 1);
+  const pointLight = new THREE.PointLight(0xffffbb, 1);
   pointLight.position.set(0, 2, 12);
   scene.add(pointLight);    //MeshBasicmaterial사용시 빛 변화 x
 
@@ -58,18 +62,8 @@ if (WEBGL.isWebGLAvailable()) {
   plane.position.y = -0.5;
   plane.add(plane);
 
-
-
-
-  // renderer.render(scene, camera);
   function render(time) {
-    time *= 0.0005;  // convert time to seconds
-   
-    // obj01.rotation.y = time;
-   
     renderer.render(scene, camera);
-   
-    requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
 
