@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import {
-    OrbitControls
+  OrbitControls
 } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import { WEBGL } from './webgl'
@@ -37,6 +37,15 @@ if (WEBGL.isWebGLAvailable()) {
 
   document.body.appendChild(renderer.domElement);
 
+
+    //OrbitControls 추가  : 무조건 카메라 세팅 이후에 설정해주어야 한다.
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.minDistance = 2; //가까이 가는 범위 설정
+    controls.maxDistance = 5; //멀리 가는 범위 설정
+    controls.maxPolarAngle = Math.PI / 2;   //밑으로 가는 범위 설정
+    controls.update();
+
+
   //빛
   const pointLight = new THREE.PointLight(0xffffbb, 1);
   pointLight.position.set(0, 2, 12);
@@ -60,12 +69,24 @@ if (WEBGL.isWebGLAvailable()) {
   const plane = new THREE.Mesh(planeGeometry, planeMaterial);
   plane.rotation.x = -0.5*Math.PI;
   plane.position.y = -0.5;
-  plane.add(plane);
+  scene.add(plane);
 
   function render(time) {
     renderer.render(scene, camera);
   }
   requestAnimationFrame(render);
+
+  function animate() {
+    requestAnimationFrame( animate );
+  
+      cube.rotation.y +=0.005;
+  
+    // required if controls.enableDamping or controls.autoRotate are set to true
+    controls.update();
+    renderer.render( scene, camera );
+  }
+  animate()
+
 
   // 반응형 처리
   function onWindowResize(){

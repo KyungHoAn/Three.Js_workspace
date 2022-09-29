@@ -46,8 +46,8 @@
         //애니메이션
         function animate() {
             requestAnimationFrame(animate)
-            // gltf.scene.rotation.y -=0.01
-            // gltf.scene.rotation.x -=0.01
+            gltf.scene.rotation.y -=0.01
+            gltf.scene.rotation.x -=0.01
             renderer.render(scene,camera);
         }
         animate()
