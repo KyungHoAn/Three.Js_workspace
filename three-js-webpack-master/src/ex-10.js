@@ -25,7 +25,7 @@ if (WEBGL.isWebGLAvailable()) {
     camera.position.y = 1.5;
     camera.position.z = 1.8;
     camera.lookAt(new THREE.Vector3(0,0,0));
-  x
+    
   //캔버스
   // const canvas = document.querySelector('#ex-03');
   
