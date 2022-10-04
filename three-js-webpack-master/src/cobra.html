@@ -7,7 +7,8 @@
     <title>cobra</title>
 </head>
 <body>
-    <script id="canvas"></script>
+    <!-- <canvas id="canvas" width="1300" height="800" style="margin-top:200px"></canvas> -->
+    <canvas id="canvas" width="1900" height="900"></canvas>
     <script type="importmap">
         {
             "imports" : {
@@ -19,28 +20,65 @@
     <script type="module">
         import * as THREE from 'three'
         import {GLTFLoader} from 'GLTFLoader';
-        
-        let scene = new THREE.scene();
+        import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+        let scene = new THREE.Scene();
         let renderer = new THREE.WebGLRenderer({
             canvas : document.querySelector('#canvas'),
-            antialias : true
-        })
+            antialias : true    //매끄럽게 동작
+        });
+        // renderer.outputEncoding = THREE.sRGBEncoding;   //색상변경  
 
-        let camera = new THREE.PerspectiveCamera(30,1);
-        camera.postion.set(0,0,5)
+        const fov = 50;
+        const aspect = window.innerWidth / window.innerHeight;
+        const near = 0.1;
+        const far = 1000;
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.x=2;
+        camera.position.y =2;
+        camera.position.z=4;
+        camera.lookAt(new THREE.Vector3(0,0,0));
+        
+        // let camera = new THREE.PerspectiveCamera(30,1);
+        // camera.position.set(0,0,5)
 
-        scene.background = new THREE.Color('white');
-        let light = new THREE.DirectionalLight(0xffff00,10);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 1; //가까이 가는 범위 설정
+        controls.maxDistance = 5; //멀리 가는 범위 설정
+        controls.maxPolarAngle = Math.PI / 2;   //밑으로 가는 범위 설정
+        controls.update();
+
+        scene.background = new THREE.Color('gray');
+        // let light = new THREE.DirectionalLight(0xffff00,10,50);
+        // scene.add(light);
+
+        const light = new THREE.PointLight( 0xffff00,60, 130 );
+        light.position.set( 50, 50, 50 );
         scene.add(light);
+        light.castShadow =true;
+
+        // const spotLightHelper =  new THREE.SpotLightHelper(spotLight);
+        // scene.add(spotLightHelper);
+
+        //바닥 추가
+        const planeGeometry = new THREE.PlaneGeometry(30,30,1,1);
+        const planeMaterial = new THREE.MeshStandardMaterial({
+            color:0xee
+        });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -0.5 * Math.PI;
+        // plane.position.y = -0.5;     //밑에서 살짝 띄어짐
+        scene.add(plane);
 
         let loader = new GLTFLoader();
-        loader.load('ac_cobra/scene.gltf', function(gltf){
+        loader.load('../ac_cobra/scene.gltf', function(gltf){
             scene.add(gltf.scene);
-            
             renderer.render(scene, camera)
 
             function animate(){
                 requestAnimationFrame(animate)
+                gltf.scene.rotation.y -=0.001
+                // gltf.scene.rotation.x -=0.01
                 renderer.render(scene, camera);
             }
             animate()
