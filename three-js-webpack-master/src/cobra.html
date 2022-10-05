@@ -22,14 +22,14 @@
         import {GLTFLoader} from 'GLTFLoader';
         import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 
-        let scene = new THREE.Scene();
+        const scene = new THREE.Scene();
         let renderer = new THREE.WebGLRenderer({
             canvas : document.querySelector('#canvas'),
             antialias : true    //매끄럽게 동작
         });
         // renderer.outputEncoding = THREE.sRGBEncoding;   //색상변경  
 
-        const fov = 50;
+        const fov = 70;
         const aspect = window.innerWidth / window.innerHeight;
         const near = 0.1;
         const far = 1000;
@@ -43,9 +43,9 @@
         // camera.position.set(0,0,5)
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.minDistance = 1; //가까이 가는 범위 설정
-        controls.maxDistance = 5; //멀리 가는 범위 설정
-        controls.maxPolarAngle = Math.PI / 2;   //밑으로 가는 범위 설정
+        controls.minDistance = 1;               // 가까이 가는 범위 설정
+        controls.maxDistance = 10;              // 멀리 가는 범위 설정
+        controls.maxPolarAngle = Math.PI / 2;   // 밑으로 가는 범위 설정
         controls.update();
 
         scene.background = new THREE.Color('gray');
@@ -55,10 +55,28 @@
         const light = new THREE.PointLight( 0xffff00,60, 130 );
         light.position.set( 50, 50, 50 );
         scene.add(light);
-        light.castShadow =true;
+        light.castShadow = true;     //그림자가 적용x
 
         // const spotLightHelper =  new THREE.SpotLightHelper(spotLight);
         // scene.add(spotLightHelper);
+
+        const geometry = new THREE.BoxGeometry(1,1,1);
+        const material = new THREE.MeshPhongMaterial({color:0xeeeeee});
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.y=1.5;
+        cube.position.x=3.2;
+        scene.add(cube);
+        cube.castShadow = true;
+        cube.receiveShadow = true;
+
+        const geometry2 = new THREE.SphereGeometry(15,32,16);
+        const material2 = new THREE.MeshPhongMaterial({color:0xeee});
+        const sphere = new THREE.Mesh(geometry2, material2);
+        sphere.position.y = 1.5;
+        sphere.position.x = -3.2;
+        scene.add(sphere);
+        // cube2.castShadow = true;
+        // cube2.receiveShadow = true;
 
         //바닥 추가
         const planeGeometry = new THREE.PlaneGeometry(30,30,1,1);
@@ -75,14 +93,17 @@
             scene.add(gltf.scene);
             renderer.render(scene, camera)
 
-            function animate(){
+            function animate() {
                 requestAnimationFrame(animate)
-                gltf.scene.rotation.y -=0.001
-                // gltf.scene.rotation.x -=0.01
+                gltf.scene.rotation.y -=0.003
+                cube.rotation.y -=0.005
                 renderer.render(scene, camera);
             }
             animate()
         })
+
+        function render(time){
+        }
     </script>
 </body>
 </html>
