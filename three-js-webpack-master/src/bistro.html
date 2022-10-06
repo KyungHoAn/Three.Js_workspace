@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Three.js - Fundamentals with light</title>
+  </head>
+</script>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+            }
+        }
+    </script>
+<script type="module">
+    import * as THREE from 'three';
+    // import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+    import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
+    import {GUI} from 'gui.dat';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera( 15, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    const renderer = new THREE.WebGLRenderer();
+    const loader = new GLTFLoader();
+
+    const bistro = await loader.loadAsync('../subaru_cicio_bistro/scene.gltf');
+    scene.add(bistro.scene);
+
+    scene.background = new THREE.Color('#72c0ff');
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+    camera.position.set( 0, 1, 20 );
+
+    document.body.appendChild( renderer.domElement );
+
+    const light = new THREE.SpotLight()
+    light.position.set(0, 15, 120)
+    scene.add(light)
+
+    const props = {light : false};
+    props.lightOff = () => {
+        light.position.set(0, 0, 0)
+    }
+    props.lightOn = () => {
+        light.position.set(0,15,120)
+    }
+
+    // let auto;
+    // auto.onChange(
+    //     function(newValue){
+    //         console.log("1")
+    //     }
+    // )
+
+    const gui = new GUI();
+    const bistroFolder = gui.addFolder("projectBistro")
+    bistroFolder.add(bistro.scene.rotation, "x", 0, Math.PI *2)
+    bistroFolder.add(bistro.scene.rotation, "y", 0, Math.PI *2)
+    bistroFolder.add(bistro.scene.rotation, "z", 0, Math.PI *2)
+
+    // bistroFolder.add(props,'autoRotation').name('Auto Rotation').listen();
+
+    bistroFolder.open()
+    const cameraFolder = gui.addFolder("Camera")
+    cameraFolder.add(camera.position,"z",0,20)
+    cameraFolder.open()
+    const lightFolder = gui.addFolder("Light")
+    // lightFolder.add(light.position,"x",20,120)
+    // lightFolder.add(light.position,"y",20,120)
+    // lightFolder.add(light.position,"z",20,120)
+    lightFolder.add(props,'lightOff').name('Light OFF').listen();
+    lightFolder.add(props,'lightOn').name('Light ON').listen();
+    lightFolder.open()
+
+    function animate() {
+        requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+    }
+    animate();
+
+    setInterval(function(){
+        bistro.scene.children[0].rotation.z += 0.001;
+    }, 5);
+
+</script>
+</body>
+</html>
