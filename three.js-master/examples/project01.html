@@ -9,108 +9,109 @@
 <body>
     <script type="importmap">
         {
-            "imports": {
-                "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+            "imports" : {
+                "three" : "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
+                "GLTFLoader" : "https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js",
             }
         }
     </script>
-<script type="module">
-    import * as THREE from 'three';
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+        import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
+        import {GUI} from './jsm/libs/lil-gui.module.min.js';
+        // import BISTRO from './subaru_cicio_bistro/scene.gltf';
 
-    // import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
-    import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r132/examples/jsm/loaders/GLTFLoader.js';
-    import {GUI} from './jsm/libs/lil-gui.module.min.js';
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 15, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        const renderer = new THREE.WebGLRenderer();
+        const loader = new GLTFLoader();
+        let autoE = false;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 15, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    const renderer = new THREE.WebGLRenderer();
-    const loader = new GLTFLoader();
-    let autoE = false;
+        const bistro = await loader.loadAsync('./subaru_cicio_bistro/scene.gltf');
+        // const bistro = await loader.loadAsync(BISTRO);
+        scene.add(bistro.scene);
 
-    const bistro = await loader.loadAsync('./subaru_cicio_bistro/scene.gltf');
-    scene.add(bistro.scene);
+        scene.background = new THREE.Color('#72c0ff');
 
-    scene.background = new THREE.Color('#72c0ff');
+        renderer.setSize( window.innerWidth, window.innerHeight );
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+        camera.position.set( 0, 1, 16 );
 
-    camera.position.set( 0, 1, 16 );
+        document.body.appendChild( renderer.domElement );
 
-    document.body.appendChild( renderer.domElement );
+        const light = new THREE.SpotLight()
+        light.position.set(0, 60, 120)
+        scene.add(light)
 
-    const light = new THREE.SpotLight()
-    light.position.set(0, 60, 120)
-    scene.add(light)
-
-    const props = {hideBars : false};
-    props.lightOff = () => {
-        light.position.set(0, 0, 0)
-    }
-    props.lightOn = () => {
-        light.position.set(0,60,120)
-    }
-
-    const gui = new GUI();
-    const bistroFolder = gui.addFolder("projectBistro")
-    bistroFolder.add(bistro.scene.rotation, "x", 0, Math.PI * 2)
-    bistroFolder.add(bistro.scene.rotation, "y", 0, Math.PI * 2)
-    bistroFolder.add(bistro.scene.rotation, "z", 0, Math.PI * 2)
-    const hideBarsController = bistroFolder.add(props,'hideBars').name('Auto Rotation').listen();
-    hideBarsController.onChange(
-        function(value){
-            if(value === true){
-                autoE = true
-            }else {
-                autoE = false
-            }            
+        const props = {hideBars : false};
+        props.lightOff = () => {
+            light.position.set(0, 0, 0)
         }
-    );
-
-    bistroFolder.open()
-    const cameraFolder = gui.addFolder("Camera")
-    cameraFolder.add(camera.position,"z",0,20)
-    cameraFolder.open()
-    const lightFolder = gui.addFolder("Light")
-    lightFolder.add(props,'lightOff').name('Light OFF').listen();
-    lightFolder.add(props,'lightOn').name('Light ON').listen();
-    lightFolder.open()
-
-    // const geometry = new THREE.CapsuleGeometry(1,1,4,8);
-    // const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    // const capsule = new THREE.Mesh( geometry, material );
-    // scene.add(capsule);
-
-    const geometry = new THREE.IcosahedronGeometry(0.5,5);
-    // const geometry = new THREE.BoxGeometry(1,1,1);
-    const material = new THREE.MeshPhongMaterial({color:0xeeeeee});
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.y = 2.3;
-    cube.position.x = -2.5;
-    scene.add(cube);
-
-    const planeGeometry = new THREE.PlaneGeometry(30,30,1,1);
-    const planeMaterial = new THREE.MeshStandardMaterial({
-        color:0x48C64B
-    });
-
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -0.5 * Math.PI;
-    scene.add(plane);
-
-    function animate() {
-        requestAnimationFrame( animate );
-        renderer.render( scene, camera );
-    }
-    animate();
-
-    setInterval(function() {
-        console.log(autoE)
-        if(autoE === true){
-            bistro.scene.children[0].rotation.z += 0.001;
+        props.lightOn = () => {
+            light.position.set(0,60,120)
         }
-        // cube.rotation.y +=0.001;
-    },5);
 
-</script>
+        const gui = new GUI();
+        const bistroFolder = gui.addFolder("projectBistro")
+        bistroFolder.add(bistro.scene.rotation, "x", 0, Math.PI * 2)
+        bistroFolder.add(bistro.scene.rotation, "y", 0, Math.PI * 2)
+        bistroFolder.add(bistro.scene.rotation, "z", 0, Math.PI * 2)
+        const hideBarsController = bistroFolder.add(props,'hideBars').name('Auto Rotation').listen();
+        hideBarsController.onChange(
+            function(value){
+                if(value === true){
+                    autoE = true
+                }else {
+                    autoE = false
+                }            
+            }
+        );
+
+        bistroFolder.open()
+        const cameraFolder = gui.addFolder("Camera")
+        cameraFolder.add(camera.position,"z",0,20)
+        cameraFolder.open()
+        const lightFolder = gui.addFolder("Light")
+        lightFolder.add(props,'lightOff').name('Light OFF').listen();
+        lightFolder.add(props,'lightOn').name('Light ON').listen();
+        lightFolder.open()
+
+        // const geometry = new THREE.CapsuleGeometry(1,1,4,8);
+        // const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+        // const capsule = new THREE.Mesh( geometry, material );
+        // scene.add(capsule);
+
+        const geometry = new THREE.IcosahedronGeometry(0.5,5);
+        // const geometry = new THREE.BoxGeometry(1,1,1);
+        const material = new THREE.MeshPhongMaterial({color:0xeeeeee});
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.y = 2.3;
+        cube.position.x = -2.5;
+        scene.add(cube);
+
+        const planeGeometry = new THREE.PlaneGeometry(30,30,1,1);
+        const planeMaterial = new THREE.MeshStandardMaterial({
+            color:0x48C64B
+        });
+
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -0.5 * Math.PI;
+        scene.add(plane);
+
+        function animate() {
+            requestAnimationFrame( animate );
+            renderer.render( scene, camera );
+        }
+        animate();
+
+        setInterval(function() {
+            console.log(autoE)
+            if(autoE === true){
+                bistro.scene.children[0].rotation.z += 0.001;
+            }
+            // cube.rotation.y +=0.001;
+        },5);
+
+    </script>
 </body>
 </html>
