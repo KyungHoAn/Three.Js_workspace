@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Three.js TypeScript Tutorials by Sean Bradley : https://sbcode.net/threejs</title>
+        <meta name="author" content="Sean Bradley" />
+        <style>
+            body {
+                overflow: hidden;
+                margin: 0px;
+            }
+
+            #debug1 {
+                font-family: monospace;
+                font-size: larger;
+                position: absolute;
+                left: 0px;
+                top: 50px;
+                border: 1px solid red;
+                width: 180px;
+                height: 220px;
+                color: white;
+                pointer-events: none;
+            }
+        </style>
+        <!-- Import maps polyfill -->
+        <!-- Remove this when import maps will be widely supported -->
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "../build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "../examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                    "dat.gui": "https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js"
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <a href="/view_source/object-hierarchy.html" id="vwSrcLink" target="_blank">&lt;&gt;</a>
+        <div id="debug1"></div>
+        <script type="module">
+            import * as THREE from 'three'
+            import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+            import Stats from 'three/examples/jsm/libs/stats.module'
+            import {GUI} from './jsm/libs/lil-gui.module.min.js';
+
+            // 1. Scene created
+            const scene = new THREE.Scene()
+
+            // 2. camera created
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+            camera.position.x = 4
+            camera.position.y = 4
+            camera.position.z = 4
+
+            // 3. renderer created
+            const renderer = new THREE.WebGLRenderer()
+            renderer.setSize(window.innerWidth, window.innerHeight)
+            document.body.appendChild(renderer.domElement)
+
+            // 4. controls created
+            const controls = new OrbitControls(camera, renderer.domElement)
+            //controls.target.set(8, 0, 0)
+            controls.target.set(8, 0, 0)
+
+            // 5. light1 created
+            const light1 = new THREE.PointLight()
+            light1.position.set(10, 10, 10)
+            scene.add(light1)
+
+            const light2 = new THREE.PointLight()
+            light2.position.set(-10, 10, 10)
+            scene.add(light2)
+
+
+            // 6. object created
+            const object1 = new THREE.Mesh(
+                new THREE.SphereBufferGeometry(),
+                new THREE.MeshPhongMaterial({ color: 0xff0000 })
+            )
+            //object1.position.set(4, 0, 0)
+            object1.position.set(4, 0, 0)
+
+            // 7. add object to scene
+            scene.add(object1)
+            object1.add(new THREE.AxesHelper(5))
+
+
+            const object2 = new THREE.Mesh(
+                new THREE.SphereBufferGeometry(),
+                new THREE.MeshPhongMaterial({ color: 0x00ff00 })
+            )
+            object2.position.set(4, 0, 0)
+            object1.add(object2)
+            object2.add(new THREE.AxesHelper(5))
+
+            const object3 = new THREE.Mesh(
+                new THREE.SphereBufferGeometry(),
+                new THREE.MeshPhongMaterial({ color: 0x0000ff })
+            )
+            object3.position.set(4, 0, 0)
+            object2.add(object3)
+            object3.add(new THREE.AxesHelper(5))
+
+
+            const props = {hideBars : false};
+            const gui = new GUI();
+            const propjectFolder = gui.addFolder("objqct1")
+            propjectFolder.add(object1.rotation, "x", 0, Math.PI * 2)
+            propjectFolder.add(object1.rotation, "y", 0, Math.PI * 2)
+            propjectFolder.add(object1.rotation, "z", 0, Math.PI * 2)
+
+            const propjectFolder2 = gui.addFolder("objqct2")
+            propjectFolder2.add(object2.rotation, "x", 0, Math.PI * 2)
+            propjectFolder2.add(object2.rotation, "y", 0, Math.PI * 2)
+            propjectFolder2.add(object2.rotation, "z", 0, Math.PI * 2)
+
+            const propjectFolder3 = gui.addFolder("objqct3")
+            propjectFolder3.add(object3.rotation, "x", 0, Math.PI * 2)
+            propjectFolder3.add(object3.rotation, "y", 0, Math.PI * 2)
+            propjectFolder3.add(object3.rotation, "z", 0, Math.PI * 2)
+            
+            //import {GGUI} from 'dat.gui'
+
+            window.addEventListener('resize', onWindowResize, false)
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight
+                camera.updateProjectionMatrix()
+                renderer.setSize(window.innerWidth, window.innerHeight)
+                render()
+            }
+
+            // 8. stats created and added
+            const stats = Stats()
+            document.body.appendChild(stats.dom)
+
+            const debug = document.getElementById('debug1')
+
+            function animate() {
+                requestAnimationFrame(animate)
+                controls.update()
+                render()
+                const object1WorldPosition = new THREE.Vector3()
+                object1.getWorldPosition(object1WorldPosition)
+
+                const object2WorldPosition = new THREE.Vector3()
+                object2.getWorldPosition(object2WorldPosition)
+
+                const object3WorldPosition = new THREE.Vector3()
+                object3.getWorldPosition(object3WorldPosition)
+                
+               
+                
+                debug.innerText =
+                    'Red\n' +
+                    'Local Pos X : ' +
+                    object1.position.x.toFixed(2) +
+                    '\n' +
+                    'World Pos X : ' +
+                    object1WorldPosition.x.toFixed(2) +
+                    '\n' +
+                    '\nGreen\n' +
+                    'Local Pos X : ' +
+                    object2.position.x.toFixed(2) +
+                    '\n' +
+                    'World Pos X : ' +
+                    object2WorldPosition.x.toFixed(2) +
+                    '\n' +
+                    '\nBlue\n' +
+                    'Local Pos X : ' +
+                    object3.position.x.toFixed(2) +
+                    '\n' +
+                    'World Pos X : ' +
+                    object3WorldPosition.x.toFixed(2) +
+                    '\n'
+
+                stats.update()
+            }
+
+            function render() {
+                renderer.render(scene, camera)
+            }
+
+            animate()
+        </script>
+    </body>
+</html>
