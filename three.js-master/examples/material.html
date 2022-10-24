@@ -1,193 +1,241 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>
-			Three.js TypeScript Tutorials by Sean Bradley : https://sbcode.net/threejs
-		</title>
-		<meta name="author" content="Sean Bradley" />
-		<style>
-			body {
-				overflow: hidden;
-				margin: 0px;
-			}
+    <head>
+        <title>Three.js TypeScript Tutorials by Sean Bradley : https://sbcode.net/threejs</title>
+        <meta name="author" content="Sean Bradley" />
+        <style>
+            body {
+                overflow: hidden;
+                margin: 0px;
+            }
 
-			#debug1 {
-				font-family: monospace;
-				font-size: larger;
-				position: absolute;
-				left: 0px;
-				top: 50px;
-				border: 1px solid red;
-				width: 180px;
-				height: 220px;
-				color: white;
-				pointer-events: none;
-			}
-		</style>
-		<!-- Import maps polyfill -->
-		<!-- Remove this when import maps will be widely supported -->
+            #debug1 {
+                font-family: monospace;
+                font-size: larger;
+                position: absolute;
+                left: 0px;
+                top: 50px;
+                border: 1px solid red;
+                width: 180px;
+                height: 220px;
+                color: white;
+                pointer-events: none;
+            }
+        </style>
+        <!-- Import maps polyfill -->
+        <!-- Remove this when import maps will be widely supported -->
 
-		<script type="importmap">
-			{
-				"imports": {
-					"three": "../build/three.module.js",
-					"three/examples/jsm/controls/OrbitControls": "../examples/jsm/controls/OrbitControls.js",
-					"three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
-					"dat.gui": "https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js"
-				}
-			}
-		</script>
-	</head>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "../build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "../examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                    "dat.gui": "https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.3/dat.gui.min.js"
+                }
+            }
+        </script>
+    </head>
 
-	<body>
-		<a href="/view_source/object-hierarchy.html" id="vwSrcLink" target="_blank"
-			>&lt;&gt;</a
-		>
-		<div id="debug1"></div>
-		<script type="module">
-			import * as THREE from "three";
-			import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-			import Stats from "three/examples/jsm/libs/stats.module";
-			import { GUI } from "./jsm/libs/lil-gui.module.min.js";
+    <body>
+        <a href="/view_source/object-hierarchy.html" id="vwSrcLink" target="_blank">&lt;&gt;</a>
+        <div id="debug1"></div>
+        <script type="module">
+            import * as THREE from 'three'
+            import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+            import Stats from 'three/examples/jsm/libs/stats.module'
+            import {GUI} from './jsm/libs/lil-gui.module.min.js';
 
-			// 1. Scene created
-			const scene = new THREE.Scene();
+            // scene
+            const scene = new THREE.Scene()
+            scene.add(new THREE.AxesHelper(5))
 
-			// 2. camera created
-			const camera = new THREE.PerspectiveCamera(
-				75,
-				window.innerWidth / window.innerHeight,
-				0.1,
-				1000
-			);
-			camera.position.x = 4;
-			camera.position.y = 4;
-			camera.position.z = 4;
+            // camera
+            const camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            )
+            camera.position.z = 3
 
-			// 3. renderer created
-			const renderer = new THREE.WebGLRenderer();
-			renderer.setSize(window.innerWidth, window.innerHeight);
-			document.body.appendChild(renderer.domElement);
+            // renderer
+            const renderer = new THREE.WebGLRenderer()
+            renderer.setSize(window.innerWidth, window.innerHeight)
+            document.body.appendChild(renderer.domElement)
 
-			// 4. controls created
-			const controls = new OrbitControls(camera, renderer.domElement);
-			//controls.target.set(8, 0, 0)
-			controls.target.set(8, 0, 0);
+            // controls
+            new OrbitControls(camera, renderer.domElement)
 
-			// 5. light1 created
-			const light1 = new THREE.PointLight();
-			light1.position.set(10, 10, 10);
-			scene.add(light1);
+            // Geometry
+            const boxGeometry = new THREE.BoxGeometry()
+            const sphereGeometry = new THREE.SphereGeometry()
+            const icosahedronGeometry = new THREE.IcosahedronGeometry(1, 0)
+            const planeGeometry = new THREE.PlaneGeometry()
+            const torusKnotGeometry = new THREE.TorusKnotGeometry()
 
-			const light2 = new THREE.PointLight();
-			light2.position.set(-10, 10, 10);
-			scene.add(light2);
+            
+            // NormalMaterial Material
+            // let material = new THREE.MeshNormalMaterial()
+            let material = '';
+            
+            //state
+            const stats = Stats()
+            document.body.appendChild(stats.dom)
 
-			// 6. object created
-			const object1 = new THREE.Mesh(
-				new THREE.SphereBufferGeometry(),
-				new THREE.MeshPhongMaterial({ color: 0xff0000 })
-			);
-			//object1.position.set(4, 0, 0)
-			object1.position.set(4, 0, 0);
+            const MeshBasicMaterial = () => {
+                // Basicmaterial
+                material = new THREE.MeshBasicMaterial()
+            }
+            function NormalMaterial(){
+                // NormalMaterial Material
+                material = new THREE.MeshNormalMaterial()
+            }
+            function LambertMaterial() {
+                // LambertMaterial
+                material = new THREE.MeshLambertMaterial()
+            }
+            function MeshPhongMaterial() {
+                // MeshPhongMaterial
+                material= new THREE.MeshPhongMaterial()
+            }
+            function StandardMaterial() {
+                // StandardMaterial
+                material = new THREE.MeshStandardMaterial()
+            }
 
-			// 7. add object to scene
-			scene.add(object1);
-			object1.add(new THREE.AxesHelper(5));
+            // cube
+            const cube = new THREE.Mesh(boxGeometry, material)
+            cube.position.x = 5
+            scene.add(cube)
 
-			const object2 = new THREE.Mesh(
-				new THREE.SphereBufferGeometry(),
-				new THREE.MeshPhongMaterial({ color: 0x00ff00 })
-			);
-			object2.position.set(4, 0, 0);
-			object1.add(object2);
-			object2.add(new THREE.AxesHelper(5));
+            const sphere = new THREE.Mesh(sphereGeometry, material)
+            sphere.position.x = 3
+            scene.add(sphere)
 
-			const object3 = new THREE.Mesh(
-				new THREE.SphereBufferGeometry(),
-				new THREE.MeshPhongMaterial({ color: 0x0000ff })
-			);
-			object3.position.set(4, 0, 0);
-			object2.add(object3);
-			object3.add(new THREE.AxesHelper(5));
+            const icosahedron = new THREE.Mesh(icosahedronGeometry, material)
+            icosahedron.position.x = 0
+            scene.add(icosahedron)
 
-			const props = { hideBars: false };
-			const gui = new GUI();
-			const propjectFolder = gui.addFolder("objqct1");
-			propjectFolder.add(object1.rotation, "x", 0, Math.PI * 2);
-			propjectFolder.add(object1.rotation, "y", 0, Math.PI * 2);
-			propjectFolder.add(object1.rotation, "z", 0, Math.PI * 2);
+            const plane = new THREE.Mesh(planeGeometry, material)
+            plane.position.x = -2
+            scene.add(plane)
 
-			const propjectFolder2 = gui.addFolder("objqct2");
-			propjectFolder2.add(object2.rotation, "x", 0, Math.PI * 2);
-			propjectFolder2.add(object2.rotation, "y", 0, Math.PI * 2);
-			propjectFolder2.add(object2.rotation, "z", 0, Math.PI * 2);
+            const torusKnot = new THREE.Mesh(torusKnotGeometry, material)
+            torusKnot.position.x = -5
+            scene.add(torusKnot)
 
-			const propjectFolder3 = gui.addFolder("objqct3");
-			propjectFolder3.add(object3.rotation, "x", 0, Math.PI * 2);
-			propjectFolder3.add(object3.rotation, "y", 0, Math.PI * 2);
-			propjectFolder3.add(object3.rotation, "z", 0, Math.PI * 2);
+            //addEventListnerer
+            window.addEventListener('resize', onWindowResize, false)
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight
+                camera.updateProjectionMatrix()
+                renderer.setSize(window.innerWidth, window.innerHeight)
+                render()
+            }
 
-			//import {GGUI} from 'dat.gui'
+            const options = {
+                combine: {
+                    basicmaterial : 1,
+                    normalMaterial : 2,
+                    lambertMaterial : 3,
+                    meshPhongMaterial : 4,
+                    standardMaterial : 5,
+                },
+            }
 
-			window.addEventListener("resize", onWindowResize, false);
-			function onWindowResize() {
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-				renderer.setSize(window.innerWidth, window.innerHeight);
-				render();
-			}
+            // GUI
+            const gui = new GUI()
+            const materialFolder = gui.addFolder('THREE.Material')
+            // materialFolder.add(material, 'transparent').onChange(() => material.needsUpdate = true)
+            // materialFolder.add(material, 'opacity', 0, 1, 0.01)
+            // materialFolder.add(material, 'depthTest')
+            // materialFolder.add(material, 'depthWrite')
+            // materialFolder
+            //     .add(material, 'alphaTest', 0, 1, 0.01)
+            //     .onChange(() => updateMaterial())
+            // materialFolder.add(material, 'visible')
+            // materialFolder
+            //     .add(material, 'side', options.side)
+            //     .onChange(() => updateMaterial())
+            // materialFolder.open()
 
-			// 8. stats created and added
-			const stats = Stats();
-			document.body.appendChild(stats.dom);
+            // // Basic Material
+            // const meshBasicMaterialFolder = gui.addFolder('THREE.MeshBasicMaterial')
+            // // Normal Material
+            // const meshNormalMaterialFolder = gui.addFolder('THREE.MeshNormalMaterial')
+            // // LambertMaterial
+            // const meshLambertMaterialFolder = gui.addFolder('THREE.MeshLambertMaterial')
+            // // PhongMaterial
+            // const meshPhongMaterialFolder = gui.addFolder('THREE.MeshPhongMaterial')
+            // //StandardMaterial
+            // const meshStandardMaterialFolder = gui.addFolder('THREE.MeshStandardMaterial')
 
-			const debug = document.getElementById("debug1");
 
-			function animate() {
-				requestAnimationFrame(animate);
-				controls.update();
-				render();
-				const object1WorldPosition = new THREE.Vector3();
-				object1.getWorldPosition(object1WorldPosition);
+            // meshNormalMaterialFolder.add(material, 'wireframe')
+            
+            // 생성                
+            materialFolder
+            .add(material, 'combine', options.combine)
+            .onChange((e) => updateMaterial(e))
+            // open =
+            // meshNormalMaterialFolder.open()
+            materialFolder.open()
+            
 
-				const object2WorldPosition = new THREE.Vector3();
-				object2.getWorldPosition(object2WorldPosition);
+            // meshLambertMaterialFolder
+            //     .add()
+            // meshLambertMaterialFolder.addColor(data, 'color').onChange(() => {
+            //     material.color.setHex(Number(data.color.toString().replace('#', '0x')))
+            // })
+            // //meshLambertMaterialFolder.addColor(data, 'emissive').onChange(() => { material.emissive.setHex(Number(data.emissive.toString().replace('#', '0x'))) })
+            // meshLambertMaterialFolder.add(material, 'wireframe')
+            // meshLambertMaterialFolder.add(material, 'wireframeLinewidth', 0, 10)
+            // //meshLambertMaterialFolder.add(material, 'flatShading').onChange(() => updateMaterial())
+            // meshLambertMaterialFolder
+            //     .add(material, 'combine', options.combine)
+            //     .onChange(() => updateMaterial())
+            // meshLambertMaterialFolder.add(material, 'reflectivity', 0, 1)
+            // meshLambertMaterialFolder.add(material, 'refractionRatio', 0, 1)
+            // meshLambertMaterialFolder.open()
 
-				const object3WorldPosition = new THREE.Vector3();
-				object3.getWorldPosition(object3WorldPosition);
+            function updateMaterial(e) {
+                switch(e) {
+                    case 1:
+                        MeshBasicMaterial()
+                        break;
+                    case 2:
+                        NormalMaterial()
+                        break;
+                    case 3:
+                        LambertMaterial()
+                        break;
+                    case 4:
+                        MeshPhongMaterial()
+                        break;
+                    case 5:
+                        StandardMaterial()
+                        break;
+                    default:
+                        break;
+                }
+                material.combine = Number(material.combine)
+                material.needsUpdate = true
+            }
 
-				debug.innerText =
-					"Red\n" +
-					"Local Pos X : " +
-					object1.position.x.toFixed(2) +
-					"\n" +
-					"World Pos X : " +
-					object1WorldPosition.x.toFixed(2) +
-					"\n" +
-					"\nGreen\n" +
-					"Local Pos X : " +
-					object2.position.x.toFixed(2) +
-					"\n" +
-					"World Pos X : " +
-					object2WorldPosition.x.toFixed(2) +
-					"\n" +
-					"\nBlue\n" +
-					"Local Pos X : " +
-					object3.position.x.toFixed(2) +
-					"\n" +
-					"World Pos X : " +
-					object3WorldPosition.x.toFixed(2) +
-					"\n";
+            function animate() {
+                requestAnimationFrame(animate)
 
-				stats.update();
-			}
+                render()
 
-			function render() {
-				renderer.render(scene, camera);
-			}
+                stats.update()
+            }
 
-			animate();
-		</script>
-	</body>
+            function render() {
+                renderer.render(scene, camera)
+            }
+
+            animate()
+        </script>
+    </body>
 </html>
