@@ -188,3 +188,27 @@ const FloorColor = 0xff0000;
 Scene.fog = new THREE.Fog(FogColor,2,8) // 거리 조절
 Scene.fog = new THREE.FogExp2(color,near, far)  //밀도 조절
 ```
+
+## 3차원 공간
+- 1 / 카메라 설정
+```
+  //카메라
+  const camera = new THREE.PerspectiveCamera(
+    50,
+    window.innerWidth/window.innerHeight,
+    1,
+    4000
+  )
+```
+- 2 / 가운데 x, y, z 표시
+```
+    // 가운데 표시
+    const axesHelper = new THREE.AxesHelper(5)
+    scene.add(axesHelper)
+```
+-3 / 배열과 반복문으로 화면 표시
+
+- 4 / Side값 THREE.BackSide로 변경
+  - three.js 에는 side 개념 존재, 기본값은 FrontSide라서 도형 바깥면에 질감을 표현 가능
+  - 안쪽 질감 표현시 BackSide로 속성을 변경해야한다. 양쪽 모두 노출시 DoubleSide로 설정하면 된다.
+  
