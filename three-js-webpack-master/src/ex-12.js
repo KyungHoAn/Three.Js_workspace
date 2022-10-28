@@ -3,17 +3,18 @@ import { CubeCamera, Curve } from 'three';
 import {
     OrbitControls
 } from 'three/examples/jsm/controls/OrbitControls.js';
-
+import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js";
 import { WEBGL } from './webgl'
 
 if (WEBGL.isWebGLAvailable()) {
+  let mixer;
+  const clock = new THREE.Clock()
     // 장면 추가
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xeeeeee)
     // 가운데 표시
     // const axesHelper = new THREE.AxesHelper(5)
     // scene.add(axesHelper)
-
 
   //카메라
   const camera = new THREE.PerspectiveCamera(
@@ -38,8 +39,8 @@ if (WEBGL.isWebGLAvailable()) {
   //OrbitControls 추가  : 무조건 카메라 세팅 이후에 설정해주어야 한다.
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true
-  controls.minDistance = 20; //가까이 가는 범위 설정
-  controls.maxDistance = 800; //멀리 가는 범위 설정
+  controls.minDistance = 10; //가까이 가는 범위 설정
+  controls.maxDistance = 20; //멀리 가는 범위 설정
   controls.update();
 
   const skyMaterialArray = []
@@ -91,14 +92,22 @@ if (WEBGL.isWebGLAvailable()) {
   const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
   scene.add(sky)
 
-      //도형
-      const geometry = new THREE.BoxGeometry(15,15,15);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xAF8Ff0
-      });
-      const cube = new THREE.Mesh(geometry, material);
-      cube.rotation.y=0.5;
-      scene.add(cube);
+    let loader = new GLTFLoader();
+    loader.load('../blue_Whale/blue_whale.glb',function(gltf){
+      const model = gltf.scene
+      model.position.set(1,1,0)
+      model.scale.set(0.01,0.01,0.01)
+      scene.add(model)
+
+      mixer = new THREE.AnimationMixer(model)
+      mixer.clipAction(gltf.animations[0]).play();
+      animate();
+
+      // scene.add(gltf.scene);
+      // renderer.render(scene,camera)
+    },undefined, function(e){
+      console.error(e);
+    });
 
   //빛
   const ambientLight = new THREE.AmbientLight(0xffffff,1)
@@ -106,8 +115,11 @@ if (WEBGL.isWebGLAvailable()) {
   
     function animate() {
         requestAnimationFrame( animate );
-        cube.rotation.y +=0.01;
-        cube.rotation.z +=0.01;
+
+        const delta = clock.getDelta();
+
+        mixer.update(delta);
+
         renderer.render( scene, camera );
     }
     animate()
