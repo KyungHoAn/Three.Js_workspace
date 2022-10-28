@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cobra</title>
+</head>
+<body>
+    <!-- <canvas id="canvas" width="1300" height="800" style="margin-top:200px"></canvas> -->
+    <canvas id="canvas" width="1900" height="900"></canvas>
+    <script type="importmap">
+        {
+            "imports" : {
+                "three" : "https://unpkg.com/three@0.141.0/build/three.module.js",
+                "GLTFLoader" : "https://unpkg.com/three@0.141.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three'
+        import {GLTFLoader} from 'GLTFLoader';
+        import {OrbitControls} from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+        const scene = new THREE.Scene();
+        let renderer = new THREE.WebGLRenderer({
+            canvas : document.querySelector('#canvas'),
+            antialias : true    //매끄럽게 동작
+        });
+
+        const fov = 70;
+        const aspect = window.innerWidth / window.innerHeight;
+        const near = 0.1;
+        const far = 1000;
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.x=2;
+        camera.position.y =2;
+        camera.position.z=4;
+        camera.lookAt(new THREE.Vector3(0,0,0));
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 1;               // 가까이 가는 범위 설정
+        controls.maxDistance = 10;              // 멀리 가는 범위 설정
+        controls.maxPolarAngle = Math.PI / 2;   // 밑으로 가는 범위 설정
+        controls.update();
+
+        const light = new THREE.PointLight( 0xffffff,60, 130 );
+        light.position.set( 50, 50, 50 );
+        scene.add(light);
+
+        let loader = new GLTFLoader();
+        loader.load('../blue_whale    /scene.gltf', function(gltf){
+            scene.add(gltf.scene);
+            renderer.render(scene, camera)
+
+            function animate() {
+                requestAnimationFrame(animate)
+                gltf.scene.rotation.y -=0.003
+                renderer.render(scene, camera);
+            }
+            animate()
+        })
+
+        function render(time){
+        }
+    </script>
+</body>
+</html>

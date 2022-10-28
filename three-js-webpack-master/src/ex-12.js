@@ -11,8 +11,8 @@ if (WEBGL.isWebGLAvailable()) {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xeeeeee)
     // 가운데 표시
-    const axesHelper = new THREE.AxesHelper(5)
-    scene.add(axesHelper)
+    // const axesHelper = new THREE.AxesHelper(5)
+    // scene.add(axesHelper)
 
 
   //카메라
@@ -88,13 +88,17 @@ if (WEBGL.isWebGLAvailable()) {
 
   // 매쉬 추가
   const skyGeometry = new THREE.BoxGeometry(2400,2400,2400)
-//   const skyMaterial = new THREE.MeshStandardMaterial({
-//     color: 0x333333,
-//     // map: texture,
-//     })
-    // skyMaterial.side = THREE.BackSide       //안쪽에 material을 적용하겠다.
   const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
   scene.add(sky)
+
+      //도형
+      const geometry = new THREE.BoxGeometry(15,15,15);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xAF8Ff0
+      });
+      const cube = new THREE.Mesh(geometry, material);
+      cube.rotation.y=0.5;
+      scene.add(cube);
 
   //빛
   const ambientLight = new THREE.AmbientLight(0xffffff,1)
@@ -102,6 +106,8 @@ if (WEBGL.isWebGLAvailable()) {
   
     function animate() {
         requestAnimationFrame( animate );
+        cube.rotation.y +=0.01;
+        cube.rotation.z +=0.01;
         renderer.render( scene, camera );
     }
     animate()
