@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Three.js - Fundamentals with light</title>
+  </head>
+</script>
+<body>
+    <script type="importmap">
+        {
+            "imports" : {
+                "three" : "../build/three.module.js",
+                "OrbitControls" : "./jsm/controls/OrbitControls.js",
+                "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                "OBJLoader" :"./jsm/loaders/OBJLoader.js",
+                "GUI":"./jsm/libs/lil-gui.module.min.js",
+                "MTLLoader":"./jsm/loaders/MTLLoader.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
+        import { GUI } from 'GUI';
+        import { OBJLoader } from 'OBJLoader';
+        import {MTLLoader} from 'MTLLoader';
+
+        // 장면 추가
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        const backColor = 0x786755;
+        scene.background = new THREE.Color(backColor);
+        camera.position.set(25, 10, 17 );
+
+        // 렌더러
+        const renderer = new THREE.WebGLRenderer();
+        let autoE = false;
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        //OrbitControls 추가 
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true
+        controls.minDistance = 1; //가까이 가는 범위 설정
+        controls.maxDistance = 25; //멀리 가는 범위 설정
+        controls.update();
+        
+        // let loader = new OBJLoader();
+        // const ship = await loader.loadAsync('./ship/ship.obj');
+        // scene.add(ship);
+
+        let wireframe;
+        const mtlLoader = new MTLLoader();
+        mtlLoader.load('./ship/shipMtl.mtl',(mtl) => {
+            mtl.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(mtl);
+            objLoader.load('./ship/ship.obj',(object) => {
+                object.updateMatrixWorld();
+                scene.add(object);
+                wireframe = new THREE.WireframeGeometry(object);
+            })
+        })
+
+        // 조명
+        const ambientLight = new THREE.AmbientLight(0xffffff,1)
+        scene.add(ambientLight)
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff,1)
+        directionalLight.position.set(-1,5,-1)
+        scene.add(directionalLight)
+        // const light = new THREE.SpotLight()
+        // light.position.set(0, 60, 120)
+        // scene.add(light)
+
+        
+        const props = {hideBars:false, wireframe:false};
+        const gui = new GUI();
+        const pjtFolder = gui.addFolder("controls")
+        pjtFolder.add(scene.rotation,"x",0,Math.PI*2)
+        pjtFolder.add(scene.rotation,"y",0,Math.PI*2)
+        pjtFolder.add(scene.rotation,"z",0,Math.PI*2)
+
+        const cameraFolder = gui.addFolder("Camera")
+        cameraFolder.add(camera.position,"z",2,20)
+
+        const wireframeFolder = gui.addFolder('wireFrame')
+        wireframeFolder.add(props.wireframe,'wireframe')
+
+        function animate() {
+            requestAnimationFrame( animate );
+            renderer.render( scene, camera );
+        }
+        animate();
+
+    </script>
+</body>
+</html>
