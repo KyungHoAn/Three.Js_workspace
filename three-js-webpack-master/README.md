@@ -171,3 +171,20 @@ The code can be formated with prettier:
 ```bash
 npm run format
 ```
+
+## 안개 ex-11
+- 1 / 컬러 변수 등록
+```
+const FogColor = 0x004fff
+const objColor = 0xffffff
+const FloorColor = 0xff0000;
+```
+
+- 2 / Scene 에 Fog 추가
+  - Fog는 안개를 적용할 위치를 선택할 수 있는 장점이 있어 일반적으로 많이 사용된다.
+  - 표현 의도에 따라 특정 거리까지 명확한 장명을 표시한 다음 해당 거리를 지나서 어떤 색상으로 페이드 아웃하도록 조절하는 것이 FogExp2 보다 좋은 점
+```
+// Fog
+Scene.fog = new THREE.Fog(FogColor,2,8) // 거리 조절
+Scene.fog = new THREE.FogExp2(color,near, far)  //밀도 조절
+```
