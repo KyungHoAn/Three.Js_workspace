@@ -8,6 +8,7 @@ import { WEBGL } from './webgl'
 
 if (WEBGL.isWebGLAvailable()) {
   let mixer;
+  let mixer2;
   const clock = new THREE.Clock()
     // 장면 추가
     const scene = new THREE.Scene()
@@ -108,6 +109,23 @@ if (WEBGL.isWebGLAvailable()) {
     },undefined, function(e){
       console.error(e);
     });
+    
+    let loader2 = new GLTFLoader();
+    loader2.load('../blue_Whale/blue_whale.glb',function(gltf){
+      const model2 = gltf.scene
+      model2.position.set(-4,-4,0)
+      model2.scale.set(0.01,0.01,0.01)
+      scene.add(model2)
+
+      mixer2 = new THREE.AnimationMixer(model2)
+      mixer2.clipAction(gltf.animations[0]).play();
+      animate();
+
+      // scene.add(gltf.scene);
+      // renderer.render(scene,camera)
+    },undefined, function(e){
+      console.error(e);
+    });
 
   //빛
   const ambientLight = new THREE.AmbientLight(0xffffff,1)
@@ -119,6 +137,7 @@ if (WEBGL.isWebGLAvailable()) {
         const delta = clock.getDelta();
 
         mixer.update(delta);
+        mixer2.update(delta);
 
         renderer.render( scene, camera );
     }
