@@ -28,9 +28,10 @@
 
         // 장면 추가
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera( 25, window.innerWidth / window.innerHeight, 0.1, 1000 );
-        const backColor = 0x786755;
-        scene.background = new THREE.Color(backColor);
+        const camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
+        // const backColor = 0x786755;
+        // scene.background = new THREE.Color(backColor);
+        scene.background = new THREE.Color(0xeeeeee)
         camera.position.set(25, 10, 17 );
 
         // 렌더러
@@ -45,48 +46,152 @@
         controls.minDistance = 1; //가까이 가는 범위 설정
         controls.maxDistance = 25; //멀리 가는 범위 설정
         controls.update();
+
+        // sky box
+        const skyMaterialArray = []
+        const texture_ft = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_ft.jpg')
+        const texture_bk = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_bk.jpg')
+        const texture_up = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_up.jpg')
+        const texture_dn = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_dn.jpg')
+        const texture_rt = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_rt.jpg')
+        const texture_lf = new THREE.TextureLoader().load('../static/sky_blue/bluecloud_lf.jpg')
+        
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_ft,
+            })
+        )
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_bk,
+            })
+        ) 
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_up,
+            })
+        )
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_dn,
+            })
+        )
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_rt,
+            })
+        )
+        skyMaterialArray.push(
+            new THREE.MeshStandardMaterial({
+                map:texture_lf,
+            })
+        )
+
+        // 반복문
+            for(let i=0; i<6; i++){
+                skyMaterialArray[i].side = THREE.BackSide
+            }
+
+        // 매쉬 추가
+        const skyGeometry = new THREE.BoxGeometry(240,240,240)
+        const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
+        scene.add(sky)
+
         
         // let loader = new OBJLoader();
         // const ship = await loader.loadAsync('./ship/ship.obj');
         // scene.add(ship);
 
-        let wireframe;
+        let props = {wireframe:false};
+
         const mtlLoader = new MTLLoader();
-        mtlLoader.load('./ship/shipMtl.mtl',(mtl) => {
+        const objLoader = new OBJLoader();
+
+        // const loadReturn = {
+        //     a: function() {
+        //         mtlLoader.load('./ship/shipMtl.mtl',(mtl) => {
+        //             mtl.preload();
+        //             objLoader.setMaterials(mtl);
+        //         })
+        //     }
+        // }
+        // loadReturn.a();
+
+        mtlLoader.load('./ship/shipR-0.mtl',(mtl) => {
             mtl.preload();
-            const objLoader = new OBJLoader();
             objLoader.setMaterials(mtl);
-            objLoader.load('./ship/ship.obj',(object) => {
-                object.updateMatrixWorld();
-                scene.add(object);
-                wireframe = new THREE.WireframeGeometry(object);
-            })
         })
+        
+        objLoader.load('./ship/shipR-0.obj',(object) => {
+            object.updateMatrixWorld();
+            scene.add(object);
+
+            const gui = new GUI();
+            const pjtFolder = gui.addFolder("controls")
+            pjtFolder.add(scene.rotation,"x",0,Math.PI*2)
+            pjtFolder.add(scene.rotation,"y",0,Math.PI*2)
+            pjtFolder.add(scene.rotation,"z",0,Math.PI*2)
+
+            const cameraFolder = gui.addFolder("Camera")
+            cameraFolder.add(camera.position,"z",2,20)
+
+            const wireframeFolder = gui.addFolder("wireFrame")
+            wireframeFolder.add(props,'wireframe').name('wireframe').listen();
+
+            wireframeFolder.onChange(
+                function(e){
+                    if(e.value == true){
+                        object.traverse(function(child){
+                            // console.log(child)
+                            if(child.isMesh) {
+                                let wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+                                let wireframeMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
+                                let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+                                child.add(wireframe);
+                                child.parent.attach(wireframe);
+                                child.parent.remove(child);
+                            }
+                            if(child.isLine == false){
+                                child.isLine = true;
+                                child.remove(child);
+                                // child.parent.remove();
+                                // child.parent.remove(child);
+                            }
+                        })
+                    } else {
+                        object.traverse(function(child) {
+                            child.isLine = false;
+                        })
+                        objLoader.load('./ship/shipR-0.obj',(object) => {
+                            object.updateMatrixWorld();
+                            scene.add(object);
+                        })
+                        // object.traverse(function(child){
+                        //     if(child.isLine){
+                        //     }
+                        // })
+                        // location.reload();
+                        // loadReturn.a();
+                    }
+                }
+            )
+        })
+
 
         // 조명
         const ambientLight = new THREE.AmbientLight(0xffffff,1)
         scene.add(ambientLight)
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff,1)
-        directionalLight.position.set(-1,5,-1)
+        const directionalLight = new THREE.DirectionalLight(0xffffff,0,1)
+        directionalLight.position.set(-1,2,-1)
         scene.add(directionalLight)
+        
         // const light = new THREE.SpotLight()
         // light.position.set(0, 60, 120)
         // scene.add(light)
 
         
-        const props = {hideBars:false, wireframe:false};
-        const gui = new GUI();
-        const pjtFolder = gui.addFolder("controls")
-        pjtFolder.add(scene.rotation,"x",0,Math.PI*2)
-        pjtFolder.add(scene.rotation,"y",0,Math.PI*2)
-        pjtFolder.add(scene.rotation,"z",0,Math.PI*2)
-
-        const cameraFolder = gui.addFolder("Camera")
-        cameraFolder.add(camera.position,"z",2,20)
-
-        const wireframeFolder = gui.addFolder('wireFrame')
-        wireframeFolder.add(props.wireframe,'wireframe')
+        // const props = {hideBars:false, wireframe:false};
 
         function animate() {
             requestAnimationFrame( animate );
