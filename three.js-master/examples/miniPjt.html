@@ -14,6 +14,7 @@
                 "OrbitControls" : "./jsm/controls/OrbitControls.js",
                 "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
                 "OBJLoader" :"./jsm/loaders/OBJLoader.js",
+                "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
                 "GUI":"./jsm/libs/lil-gui.module.min.js",
                 "MTLLoader":"./jsm/loaders/MTLLoader.js"
             }
@@ -25,6 +26,7 @@
         import { GUI } from 'GUI';
         import { OBJLoader } from 'OBJLoader';
         import {MTLLoader} from 'MTLLoader';
+        import {GLTFLoader} from 'GLTFLoader';
 
         // 장면 추가
         const scene = new THREE.Scene();
@@ -49,7 +51,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true
         controls.minDistance = 1; //가까이 가는 범위 설정
-        controls.maxDistance = 25; //멀리 가는 범위 설정
+        controls.maxDistance = 50; //멀리 가는 범위 설정
         controls.update();
 
         // sky box
@@ -102,16 +104,16 @@
         const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
         scene.add(sky)
 
-        
         // let loader = new OBJLoader();
         // const ship = await loader.loadAsync('./ship/ship.obj');
         // scene.add(ship);
         const gui = new GUI();
         let props = {
             wireframe:false, 
-            ambientLight: false,
+            seaGLTF: false,
             directLight: false,
-            pointLight: false
+            pointLight: false,
+            spotLight: false
         };
 
         const mtlLoader = new MTLLoader();
@@ -125,7 +127,10 @@
         objLoader.load('./ship/shipR-0.obj',(object) => {
             object.updateMatrixWorld();
             scene.add(object);
-            object.castShadow = true;
+            object.traverse(function(child){
+                child.castShadow = true;
+                child.receiveShadow = false;
+            })
             
             const pjtFolder = gui.addFolder("controls")
             pjtFolder.add(scene.rotation,"x",0,Math.PI*2)
@@ -142,7 +147,6 @@
                 function(e){
                     if(e.value == true){
                         object.traverse(function(child){
-                            // console.log(child)
                             if(child.isMesh) {
                                 let wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
                                 let wireframeMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
@@ -182,17 +186,32 @@
         scene.add(ambientLightBasic)
 
         const lightFolder = gui.addFolder("Light")
-        let ambientLight = lightFolder.add(props,'ambientLight').name('ambientLight').listen();
+        let ambientLight = lightFolder.add(props,'seaGLTF').name('seaGLTF').listen();
         ambientLight.onChange(
             function(e){
                 if(e == true){
                     removeLight();
+                    seaGeo();
                     addAmbientLight();
                     props.directLight = false;
                     props.pointLight = false;
+                    props.spotLight = false;
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        let name = scene.children[i].name
+                        if(name == "Sketchfab_Scene") {
+                            scene.children[i].visible = false;
+                        }
+                    }
                 } else {
                     removeLight();
                     scene.add(ambientLightBasic)
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        if(scene.children[i].name == "Sketchfab_model_sea"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
                 }
             }
         )
@@ -201,10 +220,21 @@
             function(e){
                 if(e == true){
                     removeLight();
-                    planeGeo();
+                    sPlaneGeo();
                     addDirectionalLight();
-                    props.ambientLight = false;
+                    props.seaGLTF = false;
                     props.pointLight = false;
+                    props.spotLight = false;
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        let name = scene.children[i].name
+                        if(name == "Sketchfab_Scene") {
+                            scene.children[i].visible = false;
+                        }
+                        if(scene.children[i].name == "Sketchfab_model_sea"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
                 } else {
                     removeLight();
                     scene.add(ambientLightBasic)
@@ -216,9 +246,54 @@
             function(e) {
                 if(e == true) {
                     removeLight();
+                    addPlane();
                     addPointLight();
-                    props.ambientLight = false;
+                    props.seaGLTF = false;
                     props.directLight = false;
+                    props.spotLight = false;
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        let name = scene.children[i].name
+                        if(name == "Sketchfab_Scene") {
+                            scene.children[i].visible = false;
+                        }
+                        if(scene.children[i].name === "Sketchfab_model_sea"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
+                } else {
+                    removeLight();
+                    scene.add(ambientLightBasic)
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        let name = scene.children[i].name
+                        if(name == "Sketchfab_Scene") {
+                            scene.children[i].visible = false;
+                        }
+                    }
+                }
+            }
+        )
+        let spotLight = lightFolder.add(props,'spotLight').name('spotLight').listen();
+        spotLight.onChange(
+            function(e) {
+                if(e == true) {
+                    removeLight()
+                    sPlaneGeo()
+                    addSpotLight()
+                    props.seaGLTF = false;
+                    props.pointLight = false;
+                    props.directLight = false;
+                    let childSize = scene.children.length;
+                    for(let i=0; i<childSize; i++){
+                        let name = scene.children[i].name
+                        if(name == "Sketchfab_Scene") {
+                            scene.children[i].visible = false;
+                        }
+                        if(scene.children[i].name === "Sketchfab_model_sea"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
                 } else {
                     removeLight();
                     scene.add(ambientLightBasic)
@@ -232,6 +307,8 @@
         let dlHelper;
         /** 빛 control */
         let light;
+        /** 바다 */
+        let seaLoad;
         
         // Scene의 모든 오브젝트를 전역으로 빛을 비춘다. 그림자 x
         function addAmbientLight() {
@@ -239,23 +316,28 @@
             scene.add(light);
         }
 
-        function addSportLight() {
-            light = new THREE.SportLight(0xffffff,1 );
-            dlHelper = new THREE.SportLightHelper(light,5, 0x0000ff);
+        // sportLight
+        function addSpotLight() {
+            light = new THREE.SpotLight(0xffffff,);
+            dlHelper = new THREE.SpotLightHelper(light, 0.3, 0x0000ff);
+            light.position.set(0,8,0)
             light.castShadow = true;
-            scene.add(light);
+            light.angle = 0.7
+            scene.add(light); 
+            scene.add(dlHelper);
         }
 
         // 특정 방향으로 빛을 방출한다 (ex. 태양) 그림자 o
         function addDirectionalLight() {
             light = new THREE.DirectionalLight(0xffffff,10);
             light.position.set(-5.5,10,1);
-            dlHelper = new THREE.DirectionalLightHelper(light,5, 0x0000ff);
+            dlHelper = new THREE.DirectionalLightHelper(light,1, 0x0000ff);
             light.castShadow = true;
-            // light.shadow.mapSize.width = 2048;  //그림자 해상도
-            // light.shadow.mapSize.height = 2048;
-            // light.shadow.radius = 8;
             scene.add(light);
+            light.shadow.mapSize.width=512;
+            light.shadow.mapSize.height = 512;
+            light.shadow.camera.near = 0.5;
+            light.shadow.camera.far = 500;
             scene.add(dlHelper);
         }
 
@@ -263,21 +345,46 @@
         function addPointLight() {
             light = new THREE.PointLight(0xffffff,1.5);
             // light.position.set(-5.5,10,1);
-            dlHelper = new THREE.PointLightHelper(light,5, 0x0000ff);
+            dlHelper = new THREE.PointLightHelper(light,10, 0x0000ff);
             light.castShadow = true;
             scene.add(light);
             scene.add(dlHelper)
         }
 
         // 바닥
-        function planeGeo() {
-            const planeGeometry = new THREE.PlaneGeometry(240,240,240,240);
+        function sPlaneGeo() {
+            const planeGeometry = new THREE.PlaneGeometry(20,20,20,20);
             const planeMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
             plane = new THREE.Mesh(planeGeometry, planeMaterial);
             plane.rotation.x = -0.5 * Math.PI;
-            plane.position.y = -0.2;
+            plane.position.y = -3.8;
             scene.add(plane);
             plane.receiveShadow = true;
+        }
+
+        // 바다
+        function seaGeo() {
+            seaLoad = new GLTFLoader();
+            seaLoad.load('./sea/scene.gltf',function(gltf){
+                gltf.scene.scale.x = 3
+                gltf.scene.scale.y = 3
+                gltf.scene.scale.z = 3
+                scene.add(gltf.scene);
+            })
+        }
+        
+        let porcoPlane;
+        // plane
+        function addPlane() {
+            porcoPlane = new GLTFLoader();
+            porcoPlane.load('./plane/porco_plane.glb',function(gltf) {
+                const model = gltf.scene
+                model.scale.x = 0.02
+                model.scale.y = 0.02
+                model.scale.z = 0.02
+                model.position.set(5,5,5)
+                scene.add(gltf.scene)
+            })
         }
 
         function removeLight() {
@@ -288,14 +395,12 @@
             light = null;
             plane = null;
         }
-        
-        // const props = {hideBars:false, wireframe:false};
 
         function animate() {
             requestAnimationFrame( animate );
             renderer.render( scene, camera );
         }
-        animate();
+        animate()
 
     </script>
 </body>
