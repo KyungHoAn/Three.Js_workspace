@@ -161,6 +161,10 @@
                                 removeLight();
                             }
                         })
+                        props.directLight = false;
+                        props.pointLight= false;
+                        props.spotLight = false;
+                        props.seaGLTF = false;
                     } else {
                         object.traverse(function(child) {
                             child.isLine = false;
