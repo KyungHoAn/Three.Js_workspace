@@ -35,10 +35,15 @@
         camera.position.set(25, 10, 17 );
 
         // 렌더러
-        const renderer = new THREE.WebGLRenderer();
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
         let autoE = false;
         renderer.setSize( window.innerWidth, window.innerHeight );
-        document.body.appendChild( renderer.domElement );
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+        
 
         //OrbitControls 추가 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -101,21 +106,16 @@
         // let loader = new OBJLoader();
         // const ship = await loader.loadAsync('./ship/ship.obj');
         // scene.add(ship);
-
-        let props = {wireframe:false};
+        const gui = new GUI();
+        let props = {
+            wireframe:false, 
+            ambientLight: false,
+            directLight: false,
+            pointLight: false
+        };
 
         const mtlLoader = new MTLLoader();
         const objLoader = new OBJLoader();
-
-        // const loadReturn = {
-        //     a: function() {
-        //         mtlLoader.load('./ship/shipMtl.mtl',(mtl) => {
-        //             mtl.preload();
-        //             objLoader.setMaterials(mtl);
-        //         })
-        //     }
-        // }
-        // loadReturn.a();
 
         mtlLoader.load('./ship/shipR-0.mtl',(mtl) => {
             mtl.preload();
@@ -125,8 +125,8 @@
         objLoader.load('./ship/shipR-0.obj',(object) => {
             object.updateMatrixWorld();
             scene.add(object);
-
-            const gui = new GUI();
+            object.castShadow = true;
+            
             const pjtFolder = gui.addFolder("controls")
             pjtFolder.add(scene.rotation,"x",0,Math.PI*2)
             pjtFolder.add(scene.rotation,"y",0,Math.PI*2)
@@ -135,7 +135,7 @@
             const cameraFolder = gui.addFolder("Camera")
             cameraFolder.add(camera.position,"z",2,20)
 
-            const wireframeFolder = gui.addFolder("wireFrame")
+            const wireframeFolder = gui.addFolder("WireFrame")
             wireframeFolder.add(props,'wireframe').name('wireframe').listen();
 
             wireframeFolder.onChange(
@@ -150,12 +150,11 @@
                                 child.add(wireframe);
                                 child.parent.attach(wireframe);
                                 child.parent.remove(child);
+                                removeLight();
                             }
                             if(child.isLine == false){
                                 child.isLine = true;
-                                child.remove(child);
-                                // child.parent.remove();
-                                // child.parent.remove(child);
+                                removeLight();
                             }
                         })
                     } else {
@@ -166,6 +165,7 @@
                             object.updateMatrixWorld();
                             scene.add(object);
                         })
+                        addAmbientLight();
                         // object.traverse(function(child){
                         //     if(child.isLine){
                         //     }
@@ -176,20 +176,118 @@
                 }
             )
         })
-
-
-        // 조명
-        const ambientLight = new THREE.AmbientLight(0xffffff,1)
-        scene.add(ambientLight)
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff,0,1)
-        directionalLight.position.set(-1,2,-1)
-        scene.add(directionalLight)
         
-        // const light = new THREE.SpotLight()
-        // light.position.set(0, 60, 120)
-        // scene.add(light)
+        // 조명
+        let ambientLightBasic = new THREE.AmbientLight(0xffffff,1)
+        scene.add(ambientLightBasic)
 
+        const lightFolder = gui.addFolder("Light")
+        let ambientLight = lightFolder.add(props,'ambientLight').name('ambientLight').listen();
+        ambientLight.onChange(
+            function(e){
+                if(e == true){
+                    removeLight();
+                    addAmbientLight();
+                    props.directLight = false;
+                    props.pointLight = false;
+                } else {
+                    removeLight();
+                    scene.add(ambientLightBasic)
+                }
+            }
+        )
+        let directLight = lightFolder.add(props, 'directLight').name('directLight').listen();
+        directLight.onChange(
+            function(e){
+                if(e == true){
+                    removeLight();
+                    planeGeo();
+                    addDirectionalLight();
+                    props.ambientLight = false;
+                    props.pointLight = false;
+                } else {
+                    removeLight();
+                    scene.add(ambientLightBasic)
+                }
+            }
+        )
+        let pointLight = lightFolder.add(props,'pointLight').name('pointLight').listen();
+        pointLight.onChange(
+            function(e) {
+                if(e == true) {
+                    removeLight();
+                    addPointLight();
+                    props.ambientLight = false;
+                    props.directLight = false;
+                } else {
+                    removeLight();
+                    scene.add(ambientLightBasic)
+                }
+            }
+        )
+
+        // 그림자를 보이게 하기 위해서 바닥 생성
+        let plane;
+        // 빛 방향 표시
+        let dlHelper;
+        /** 빛 control */
+        let light;
+        
+        // Scene의 모든 오브젝트를 전역으로 빛을 비춘다. 그림자 x
+        function addAmbientLight() {
+            light = new THREE.AmbientLight(0xffffff, 1);
+            scene.add(light);
+        }
+
+        function addSportLight() {
+            light = new THREE.SportLight(0xffffff,1 );
+            dlHelper = new THREE.SportLightHelper(light,5, 0x0000ff);
+            light.castShadow = true;
+            scene.add(light);
+        }
+
+        // 특정 방향으로 빛을 방출한다 (ex. 태양) 그림자 o
+        function addDirectionalLight() {
+            light = new THREE.DirectionalLight(0xffffff,10);
+            light.position.set(-5.5,10,1);
+            dlHelper = new THREE.DirectionalLightHelper(light,5, 0x0000ff);
+            light.castShadow = true;
+            // light.shadow.mapSize.width = 2048;  //그림자 해상도
+            // light.shadow.mapSize.height = 2048;
+            // light.shadow.radius = 8;
+            scene.add(light);
+            scene.add(dlHelper);
+        }
+
+        // 조명. 그림자 o
+        function addPointLight() {
+            light = new THREE.PointLight(0xffffff,1.5);
+            // light.position.set(-5.5,10,1);
+            dlHelper = new THREE.PointLightHelper(light,5, 0x0000ff);
+            light.castShadow = true;
+            scene.add(light);
+            scene.add(dlHelper)
+        }
+
+        // 바닥
+        function planeGeo() {
+            const planeGeometry = new THREE.PlaneGeometry(240,240,240,240);
+            const planeMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
+            plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.y = -0.2;
+            scene.add(plane);
+            plane.receiveShadow = true;
+        }
+
+        function removeLight() {
+            scene.remove(light)
+            scene.remove(ambientLightBasic)
+            scene.remove(plane)
+            scene.remove(dlHelper)
+            light = null;
+            plane = null;
+        }
         
         // const props = {hideBars:false, wireframe:false};
 
