@@ -28,12 +28,17 @@
         import {MTLLoader} from 'MTLLoader';
         import {GLTFLoader} from 'GLTFLoader';
 
+        // 애니매이션 적용 => obj 파일은 애니매이션 적용이 되지 않는다.
+        // https://threejs.org/docs/#manual/ko/introduction/Animation-system
+        const clock = new THREE.Clock()
+        
+        let mixer;
+
         // 장면 추가
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
         // const backColor = 0x786755;
         // scene.background = new THREE.Color(backColor);
-        scene.background = new THREE.Color(0xeeeeee)
         camera.position.set(25, 10, 17 );
 
         // 렌더러
@@ -119,12 +124,12 @@
         const mtlLoader = new MTLLoader();
         const objLoader = new OBJLoader();
 
-        mtlLoader.load('./ship/shipR-0.mtl',(mtl) => {
+        mtlLoader.load('./ship/ship-2.mtl',(mtl) => {
             mtl.preload();
             objLoader.setMaterials(mtl);
         })
         
-        objLoader.load('./ship/shipR-0.obj',(object) => {
+        objLoader.load('./ship/ship-2.obj',(object) => {
             object.updateMatrixWorld();
             scene.add(object);
             object.traverse(function(child){
@@ -169,7 +174,7 @@
                         object.traverse(function(child) {
                             child.isLine = false;
                         })
-                        objLoader.load('./ship/shipR-0.obj',(object) => {
+                        objLoader.load('./ship/ship-2.obj',(object) => {
                             object.updateMatrixWorld();
                             scene.add(object);
                         })
@@ -307,6 +312,32 @@
             }
         )
 
+        // background color setting
+        const bColor = new THREE.Color()
+        const data = {
+            color: bColor.getHex(),
+            mapsEnabled: true,
+            imageOn: false
+        }
+        const backColorFolder = gui.addFolder('backgroundColor')
+        backColorFolder.addColor(data,'color').onChange(() => {
+            bColor.setHex(Number(data.color.toString().replace('#','0x')))
+        })
+        scene.background = bColor;
+
+        // background image ON/OFF
+        const imageFoler = gui.addFolder('backgroundImage')
+        let backgroundImage = imageFoler.add(data,'imageOn').name('imageOn').listen();
+        backgroundImage.onChange(
+            function(e) {
+                if(e == true) {
+                    scene.remove(sky)
+                } else {
+                    scene.add(sky)
+                }
+            }
+        )
+
         // 그림자를 보이게 하기 위해서 바닥 생성
         let plane;
         // 빛 방향 표시
@@ -373,8 +404,10 @@
             seaLoad = new GLTFLoader();
             seaLoad.load('./sea/scene.gltf',function(gltf){
                 gltf.scene.scale.x = 3
-                gltf.scene.scale.y = 3
+                gltf.scene.scale.y = 1
                 gltf.scene.scale.z = 3
+                gltf.scene.position.y =1
+                console.log(gltf.scene)
                 scene.add(gltf.scene);
             })
         }
@@ -394,6 +427,40 @@
             })
         }
 
+        // 페달 바
+        mtlLoader.load('./ship/ship-1.mtl',(mtl) => {
+            mtl.preload();
+            objLoader.setMaterials(mtl);
+        })
+        
+        objLoader.load('./ship/ship-1.obj',(object) => {
+            object.updateMatrixWorld();
+            scene.add(object);
+        });
+
+        // propeller
+        let loader = new GLTFLoader();
+        loader.load('./propellers/propeller.glb',function(gltf){
+            const propell = gltf.scene
+            propell.scale.x = 0.001
+            propell.scale.y = 0.001
+            propell.scale.z = 0.001
+
+            propell.rotation.y = 1.5
+
+            propell.position.x = -0.8
+            propell.position.y = 0.4
+            propell.position.z = -2.13
+            propell.name = 'propell'
+            scene.add(propell)
+
+            mixer = new THREE.AnimationMixer(propell)
+            mixer.clipAction(gltf.animations[0]).play();
+            animate();
+        },undefined, function(e){
+            console.error(e);
+        });
+
         function removeLight() {
             scene.remove(light)
             scene.remove(ambientLightBasic)
@@ -403,9 +470,12 @@
             plane = null;
         }
 
-        function animate(e) {
+        function animate() {
             requestAnimationFrame( animate );
-            
+
+            const delta = clock.getDelta();
+            mixer.update(delta);
+
             renderer.render( scene, camera );
         }
         animate()
