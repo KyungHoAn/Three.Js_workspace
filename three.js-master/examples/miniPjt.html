@@ -189,9 +189,9 @@
         let ambientLightBasic = new THREE.AmbientLight(0xffffff,1)
         scene.add(ambientLightBasic)
 
-        const lightFolder = gui.addFolder("Light")
-        let ambientLight = lightFolder.add(props,'seaGLTF').name('seaGLTF').listen();
-        ambientLight.onChange(
+        const gltfFolder = gui.addFolder("gltf");
+        let addGltf = gltfFolder.add(props,'seaGLTF').name('seaGLTF').listen();
+        addGltf.onChange(
             function(e){
                 if(e == true){
                     removeLight();
@@ -219,6 +219,8 @@
                 }
             }
         )
+
+        const lightFolder = gui.addFolder("Light")
         let directLight = lightFolder.add(props, 'directLight').name('directLight').listen();
         directLight.onChange(
             function(e){
@@ -386,6 +388,7 @@
                 model.scale.x = 0.02
                 model.scale.y = 0.02
                 model.scale.z = 0.02
+                model.rotation.y = Math.PI
                 model.position.set(5,5,5)
                 scene.add(gltf.scene)
             })
@@ -400,8 +403,9 @@
             plane = null;
         }
 
-        function animate() {
+        function animate(e) {
             requestAnimationFrame( animate );
+            
             renderer.render( scene, camera );
         }
         animate()
