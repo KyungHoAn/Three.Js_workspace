@@ -30,6 +30,7 @@
 
         // 애니매이션 적용 => obj 파일은 애니매이션 적용이 되지 않는다.
         // https://threejs.org/docs/#manual/ko/introduction/Animation-system
+        // 참고
         const clock = new THREE.Clock()
         
         let mixer;
@@ -37,8 +38,6 @@
         // 장면 추가
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 0.1, 1000 );
-        // const backColor = 0x786755;
-        // scene.background = new THREE.Color(backColor);
         camera.position.set(25, 10, 17 );
 
         // 렌더러
@@ -317,7 +316,9 @@
         const data = {
             color: bColor.getHex(),
             mapsEnabled: true,
-            imageOn: false
+            imageOn: false,
+            time: false,
+            clearTime: 0,
         }
         const backColorFolder = gui.addFolder('backgroundColor')
         backColorFolder.addColor(data,'color').onChange(() => {
@@ -327,13 +328,26 @@
 
         // background image ON/OFF
         const imageFoler = gui.addFolder('backgroundImage')
-        let backgroundImage = imageFoler.add(data,'imageOn').name('imageOn').listen();
+        let backgroundImage = imageFoler.add(data,'imageOn').name('image ON / OFF').listen();
         backgroundImage.onChange(
             function(e) {
                 if(e == true) {
                     scene.remove(sky)
                 } else {
                     scene.add(sky)
+                }
+            }
+        )
+
+        // carMade Time clear
+        const carFolder = gui.addFolder('CAR CLEAR')
+        let carMade = carFolder.add(data,'time').name('CAR CLEAR').listen();
+        carMade.onChange(
+            function(e) {
+                if(e == true) {
+                    data.clearTime = 0;
+                } else {
+
                 }
             }
         )
@@ -407,7 +421,6 @@
                 gltf.scene.scale.y = 1
                 gltf.scene.scale.z = 3
                 gltf.scene.position.y =1
-                console.log(gltf.scene)
                 scene.add(gltf.scene);
             })
         }
@@ -460,7 +473,70 @@
         },undefined, function(e){
             console.error(e);
         });
+        
+        let dnBorn;
+        // car 하단부 뼈대
+        function dnCar() {
+            mtlLoader.load('./car/car-1.mtl',(mtl) => {
+                mtl.preload();
+                objLoader.setMaterials(mtl);
+            })
+            objLoader.load('./car/car-1.obj', (object) => {
+                object.updateMatrixWorld();
+                scene.add(object);
+                object.position.setX(4)
+                dnBorn = object
+            });
+        }
 
+        let wheel;
+        // car 바퀴
+        function carWheel() {
+                mtlLoader.load('./car/car-2.mtl',(mtl) => {
+                    mtl.preload();
+                    objLoader.setMaterials(mtl);
+                })
+                objLoader.load('./car/car-2.obj',(object) => {
+                    object.updateMatrixWorld();
+                    scene.add(object);
+                    object.position.setX(4)
+                    wheel = object
+                })
+        }
+
+        let carCommand
+        // car 본체
+        function carMain() {
+                mtlLoader.load('./car/car-0.mtl',(mtl) => {
+                    mtl.preload();
+                    objLoader.setMaterials(mtl);
+                })
+                objLoader.load('./car/car-0.obj',(object) => {
+                    object.updateMatrixWorld();
+                    scene.add(object);
+                    object.position.setX(4)
+                    carCommand = object
+                })
+        }
+
+        function madeCar(e) {
+            if(e == 100){
+                dnCar();
+            }
+            if(e == 300){
+                carWheel();
+            }
+            if(e ==500){
+                carMain();
+            }
+            if(e == 1) {
+                scene.remove(wheel)
+                scene.remove(dnBorn)
+                scene.remove(carCommand)
+            }
+        }
+
+        // 빛 삭제 함수
         function removeLight() {
             scene.remove(light)
             scene.remove(ambientLightBasic)
@@ -471,11 +547,12 @@
         }
 
         function animate() {
-            requestAnimationFrame( animate );
-
-            const delta = clock.getDelta();
-            mixer.update(delta);
-
+            requestAnimationFrame( animate )
+            const delta = clock.getDelta()
+            mixer.update(delta)
+            
+            let setTime = data.clearTime+=1
+            madeCar(setTime)
             renderer.render( scene, camera );
         }
         animate()
