@@ -32,7 +32,7 @@
         // https://threejs.org/docs/#manual/ko/introduction/Animation-system
         // 참고
         const clock = new THREE.Clock()
-        
+        const gui = new GUI();        
         let mixer;
 
         // 장면 추가
@@ -104,14 +104,21 @@
             }
 
         // 매쉬 추가
-        const skyGeometry = new THREE.BoxGeometry(240,240,240)
+        const skyGeometry = new THREE.BoxGeometry(850,850,850)
         const sky = new THREE.Mesh(skyGeometry, skyMaterialArray)
         scene.add(sky)
+
+        const imageMove = gui.addFolder("moveImg")
+        imageMove.add(scene.children[0].rotation,"x",0,Math.PI*2)
+        imageMove.add(scene.children[0].rotation,"y",0,Math.PI*2)
+        imageMove.add(scene.children[0].rotation,"z",0,Math.PI*2)
+
+        imageMove.add(scene.children[0].position,"z",0,Math.PI*2)
 
         // let loader = new OBJLoader();
         // const ship = await loader.loadAsync('./ship/ship.obj');
         // scene.add(ship);
-        const gui = new GUI();
+        
         let props = {
             wireframe:false, 
             seaGLTF: false,
@@ -346,8 +353,7 @@
             function(e) {
                 if(e == true) {
                     data.clearTime = 0;
-                } else {
-
+                    data.time = false
                 }
             }
         )
@@ -508,34 +514,63 @@
         // car 본체
         function carMain() {
                 mtlLoader.load('./car/car-0.mtl',(mtl) => {
-                    mtl.preload();
-                    objLoader.setMaterials(mtl);
+                    mtl.preload()
+                    objLoader.setMaterials(mtl)
                 })
                 objLoader.load('./car/car-0.obj',(object) => {
-                    object.updateMatrixWorld();
-                    scene.add(object);
+                    object.updateMatrixWorld()
+                    scene.add(object)
                     object.position.setX(4)
                     carCommand = object
                 })
         }
 
+        // let oneWheel
+        // let oneWheel1
+        // let oneWheel2
+        // let oneWheel3
+        // function wheelOne() {
+        //         mtlLoader.load('./car/car-3.mtl',(mtl) => {
+        //             mtl.preload();
+        //             objLoader.setMaterials(mtl);
+        //         })
+        //         objLoader.load('./car/car-3.obj',(object) => {
+        //             let ftWheel1 = object
+        //             let ftWheel2 = object
+        //             let ftWheel3 = object
+        //             let ftWheel4 = object
+        //             //1 ft
+        //             ftWheel1.updateMatrixWorld();
+        //             scene.add(ftWheel1);
+        //             ftWheel1.position.setX(3.7)
+        //             ftWheel1.position.setY(0.2)
+        //             ftWheel1.position.setZ(0.45)
+        //             ftWheel1.rotation.x =1.5
+        //             ftWheel1.rotation.z=1.5
+        //             oneWheel = ftWheel1
+        //             //
+        //         })
+        // }
+        // wheelOne();
+
+        // 3초마다 차량의 모양을 만든다.
         function madeCar(e) {
-            if(e == 100){
+            if(e == 100) {
                 dnCar();
             }
-            if(e == 300){
+            if(e == 300) {
                 carWheel();
             }
-            if(e ==500){
+            if(e ==500) {
                 carMain();
             }
             if(e == 1) {
-                scene.remove(wheel)
+                // scene.remove(wheel)
                 scene.remove(dnBorn)
                 scene.remove(carCommand)
             }
         }
-
+        
         // 빛 삭제 함수
         function removeLight() {
             scene.remove(light)
@@ -546,6 +581,23 @@
             plane = null;
         }
 
+        function moveBkImg(e) {
+            
+            if(1<= e && e< 4000){
+                scene.children[0].position.z += -Math.PI*0.03
+            }
+            if(4000<= e){
+                scene.children[0].rotation.y += -Math.PI*0.0003
+            }
+            
+            // if(200 <= e && e< 400 || 4000 <= e && e<=5200){
+            //     scene.children[0].rotation.y += -Math.PI*0.0003
+            // }
+            
+            
+        }
+        let count = 0;
+        
         function animate() {
             requestAnimationFrame( animate )
             const delta = clock.getDelta()
@@ -553,6 +605,21 @@
             
             let setTime = data.clearTime+=1
             madeCar(setTime)
+            
+            // if(wheel){
+            //     wheel.rotation.x += delta * 1;
+            //     // wheel.rotation.y += delta * 1;
+            // }
+            // oneWheel.rotation.x += delta *1;
+
+            moveBkImg(setTime)
+            // let y1 = scene.children[0].position.z.toFixed(1)    //0.0
+            // if(y1 == 0.0 || y1 >= -10.0){
+            //     scene.children[0].position.z += -Math.PI*0.03
+            // }
+            // let x1 = scene.children[0].position.x.toFixed(1)    // 0.0
+            
+
             renderer.render( scene, camera );
         }
         animate()
