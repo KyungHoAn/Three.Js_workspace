@@ -99,9 +99,9 @@
         )
 
         // 반복문
-            for(let i=0; i<6; i++){
-                skyMaterialArray[i].side = THREE.BackSide
-            }
+        for(let i=0; i<6; i++){
+            skyMaterialArray[i].side = THREE.BackSide
+        }
 
         // 매쉬 추가
         const skyGeometry = new THREE.BoxGeometry(850,850,850)
@@ -113,7 +113,7 @@
         imageMove.add(scene.children[0].rotation,"y",0,Math.PI*2)
         imageMove.add(scene.children[0].rotation,"z",0,Math.PI*2)
 
-        imageMove.add(scene.children[0].position,"z",0,Math.PI*2)
+        imageMove.add(scene.children[0].position,"z",-400,200)
 
         // let loader = new OBJLoader();
         // const ship = await loader.loadAsync('./ship/ship.obj');
@@ -138,6 +138,7 @@
         objLoader.load('./ship/ship-2.obj',(object) => {
             object.updateMatrixWorld();
             scene.add(object);
+            object.position.y = -2
             object.traverse(function(child){
                 child.castShadow = true;
                 child.receiveShadow = false;
@@ -183,6 +184,7 @@
                         objLoader.load('./ship/ship-2.obj',(object) => {
                             object.updateMatrixWorld();
                             scene.add(object);
+                            object.position.y = -2
                         })
                         addAmbientLight();
                         // object.traverse(function(child){
@@ -426,7 +428,7 @@
                 gltf.scene.scale.x = 3
                 gltf.scene.scale.y = 1
                 gltf.scene.scale.z = 3
-                gltf.scene.position.y =1
+                gltf.scene.position.y =-1
                 scene.add(gltf.scene);
             })
         }
@@ -454,6 +456,7 @@
         
         objLoader.load('./ship/ship-1.obj',(object) => {
             object.updateMatrixWorld();
+            object.position.y = -2
             scene.add(object);
         });
 
@@ -468,7 +471,7 @@
             propell.rotation.y = 1.5
 
             propell.position.x = -0.8
-            propell.position.y = 0.4
+            propell.position.y = -1.6
             propell.position.z = -2.13
             propell.name = 'propell'
             scene.add(propell)
@@ -553,6 +556,50 @@
         // }
         // wheelOne();
 
+        function setupModel() {
+            
+        }
+        const path = new THREE.SplineCurve([
+            new THREE.Vector2( 10, 5 ),
+                        new THREE.Vector2( 5, 5 ),
+                        new THREE.Vector2( 5, 10 ),
+                        new THREE.Vector2( -5, 10 ),
+                        new THREE.Vector2( -5, 5 ),
+                        new THREE.Vector2( -10, 5 ),
+                        new THREE.Vector2( -10, -5 ),
+                        new THREE.Vector2( -5, -5 ),
+                        new THREE.Vector2( -5, -10 ),
+                        new THREE.Vector2( 5, -10 ),
+                        new THREE.Vector2( 5, -5 ),
+                        new THREE.Vector2( 10, -5 ),
+                        new THREE.Vector2( 10, 5 ),
+            ]);
+        const points = path.getPoints(100);
+        const testGeoMetry = new THREE.BufferGeometry().setFromPoints(points);
+        const testMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
+        const pathLine = new THREE.Line(testGeoMetry, testMaterial);
+        pathLine.rotation.x = Math.PI *.5
+        // scene.add(pathLine)
+
+        // const boxGeometry = new THREE.BoxGeometry(1,1,3);
+        const boxGeometry = new THREE.SphereGeometry(1,32,16);
+        const boxMaterial = new THREE.MeshPhongMaterial({color:0xFF96FF});
+        const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
+        scene.add(boxMesh)
+
+        function update(time){
+            const boxTime = time * .001
+            const boxPosition = new THREE.Vector3()
+            const boxNextPosition = new THREE.Vector2()
+            
+            path.getPointAt(boxTime % 1, boxPosition)
+            path.getPointAt((boxTime + 0.01) % 1, boxNextPosition)
+
+            boxMesh.position.set(boxPosition.x, 0, boxPosition.y)
+            boxMesh.lookAt(boxNextPosition.x,0,boxNextPosition.y)
+        }
+
+
         // 3초마다 차량의 모양을 만든다.
         function madeCar(e) {
             if(e == 100) {
@@ -583,21 +630,18 @@
 
         function moveBkImg(e) {
             
-            if(1<= e && e< 4000){
+            if(0<= e && e<4000){
                 scene.children[0].position.z += -Math.PI*0.03
             }
-            if(4000<= e){
-                scene.children[0].rotation.y += -Math.PI*0.0003
-            }
-            
-            // if(200 <= e && e< 400 || 4000 <= e && e<=5200){
+            // if(4000<= e){
             //     scene.children[0].rotation.y += -Math.PI*0.0003
             // }
             
-            
+            // if(200 <= e && e< 400 || 4000 <= e && e<=5200){
+            //     scene.children[0].rotation.y += -Math.PI*0.0003
+            // }            
         }
-        let count = 0;
-        
+
         function animate() {
             requestAnimationFrame( animate )
             const delta = clock.getDelta()
@@ -605,25 +649,23 @@
             
             let setTime = data.clearTime+=1
             madeCar(setTime)
-            
             // if(wheel){
             //     wheel.rotation.x += delta * 1;
             //     // wheel.rotation.y += delta * 1;
             // }
             // oneWheel.rotation.x += delta *1;
-
+            
             moveBkImg(setTime)
             // let y1 = scene.children[0].position.z.toFixed(1)    //0.0
-            // if(y1 == 0.0 || y1 >= -10.0){
+            // if(y1 == 0.0 || y1 >= -10.0) {
             //     scene.children[0].position.z += -Math.PI*0.03
             // }
             // let x1 = scene.children[0].position.x.toFixed(1)    // 0.0
             
-
+            update(setTime)
             renderer.render( scene, camera );
         }
         animate()
-
     </script>
 </body>
 </html>
