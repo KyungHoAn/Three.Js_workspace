@@ -593,8 +593,8 @@
         let ballColor = new THREE.Color()
         // const boxGeometry = new THREE.BoxGeometry(1,1,3);
         const boxGeometry = new THREE.SphereGeometry(1,32,16)
-        const boxMaterial = new THREE.MeshPhongMaterial({color:0xFF96FF});
-        // const boxMaterial = new THREE.MeshPhongMaterial({color: ballColor});
+        // const boxMaterial = new THREE.MeshPhongMaterial({color:0xFF96FF});
+        const boxMaterial = new THREE.MeshPhongMaterial({color: ballColor});
         const boxMesh = new THREE.Mesh(boxGeometry, boxMaterial);
         scene.add(boxMesh)
 
@@ -620,7 +620,7 @@
         ballColorFolder.addColor(data,'color').onChange(() => {
             ballColor.setHex(Number(data.color.toString().replace('#','0x')))
         })
-
+        scene.children[2].material.color = ballColor
 
         // 3초마다 차량의 모양을 만든다.
         function madeCar(e) {
@@ -652,7 +652,7 @@
 
         function moveBkImg(e) {
             if(0<= e && e<4000){
-                scene.children[0].position.z += -Math.PI*0.03
+                scene.children[0].position.z += -Math.PI * 0.03
             }
         }
 
@@ -670,6 +670,48 @@
             renderer.render( scene, camera );
         }
         animate()
+
+        // $("#leftBtn").on('click', function() {
+        //     console.log('left click')
+        // })
+        // $('#rightBtn').on('click',function() {
+        //     console.log('right click')
+        // })
     </script>
+    <script>        
+        // import * as THREE from 'three';
+        // import { OrbitControls } from 'OrbitControls';
+        // import { GUI } from 'GUI';
+        // import { OBJLoader } from 'OBJLoader';
+        // import {MTLLoader} from 'MTLLoader';
+        // import {GLTFLoader} from 'GLTFLoader';
+        
+        // let leftBtn = document.getElementById('leftBtn');
+        // console.log(leftBtn)
+        // leftBtn.click(function() {
+        //     console.log('test')
+        // })
+        // $("#leftBtn").on('click', function() {
+        //     console.log('left click')
+        // })
+        // $('#rightBtn').on('click',function() {
+        //     console.log('right click')
+        // })
+
+        function setLeftChange() {
+            console.log('move')
+        }
+        function setRightChange() {
+            console.log('rightMove')
+        }
+    </script>
+
+    <button class="leftBtn" type="button" id="leftBtn" onclick="setLeftChange()" style="position: relative; top:24cm; left: 48; width:100px; height:50px; background-color: rgba(0,0,0,0);">
+        left
+    </button>
+    <button class="rightBtn" type="button" id="rightBtn" onclick="setRightChange()" style="position: relative; top:24cm; left: 48; width:100px; height:50px; background-color: rgba(0,0,0,0);">
+        right
+    </button> 
+
 </body>
 </html>
