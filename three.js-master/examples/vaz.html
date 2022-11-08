@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <link rel="stylesheet" href="./viewer3D_1.css">
+    <link rel="stylesheet" href="./vaz.css">
     <title>Three.js - Fundamentals with light</title>
   </head>
 <body>
@@ -47,10 +47,10 @@
         const controls = new OrbitControls(camera, renderer.domElement)
         // controls.maxPolarAngle = Math.PI/2
         // controls.minPolarAngle = Math.PI/3
-        controls.enablePan = false
-        controls.dampingFactor = 0.1
-        controls.autoRotate = false
-        controls.autoRotateSpeed = 0.2
+        // controls.enablePan = false
+        // controls.dampingFactor = 0.1
+        // controls.autoRotate = false
+        // controls.autoRotateSpeed = 0.2
         function setCamera() {
             camera.position.set(10,5,17)
             controls.enableDamping = true
@@ -60,7 +60,8 @@
         }
         setCamera()
 
-        const loader = new GLTFLoader()
+        let loader = new GLTFLoader()
+
         const vaz = await loader.loadAsync('./vaz/scene.gltf')
         // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
         let theModel = vaz.scene
@@ -94,14 +95,15 @@
         }
 
         for(let object of inital_map) {
-            initColor(theModel,object.childID, object.mtl);
+            initColor(theModel,object.childID, object.mtl)
         }
 
         // let ambientLight = new THREE.AmbientLight(0xffffff,1)
         // scene.add(ambientLight)
         let hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,0.61)
-        hemiLight.position.set(0,50,0);
+        hemiLight.position.set(0,50,0)
         scene.add(hemiLight)
+
         let dirLight = new THREE.DirectionalLight(0xffffff,0.54)
         dirLight.position.set(-8,12,8)
         dirLight.castShadow = true
@@ -109,7 +111,7 @@
         scene.add(dirLight)
 
         const background_color = 0xf1f1f1
-        scene.background = new THREE.Color(background_color);
+        scene.background = new THREE.Color(background_color)
         scene.fog = new THREE.Fog(background_color,20,100)
 
         //Floor
@@ -128,34 +130,34 @@
 
         function buildColors(colors) {
             for (let [i, color] of colors.entries()) {
-                let swatch = document.createElement('div');
-                swatch.classList.add('tray__swatch');
-                swatch.style.background = "#" + color.color;
-                swatch.setAttribute('data-key', i);
-                TRAY.append(swatch);
+                let swatch = document.createElement('div')
+                swatch.classList.add('tray__swatch')
+                swatch.style.background = "#" + color.color
+                swatch.setAttribute('data-key', i)
+                TRAY.append(swatch)
             }
         }
-        buildColors(colors);
+        buildColors(colors)
 
         // Swatches
-        const swatches = document.querySelectorAll(".tray__swatch");
+        const swatches = document.querySelectorAll(".tray__swatch")
         for (const swatch of swatches) {
-            swatch.addEventListener('click', selectSwatch);
+            swatch.addEventListener('click', selectSwatch)
         }
 
         let carBody = theModel.children[0].children[0].children[0].children[1].children[0].material.color
 
         function selectSwatch(e) {
             let color = colors[parseInt(e.target.dataset.key)]
-            let new_mtl;
+            let new_mtl
             new_mtl = new THREE.MeshPhongMaterial({
                 color:parseInt('0x'+color.color),
                 shininess: color.shininess?color.shininess: 10
             })
-            setMaterial(theModel,new_mtl)
+            setMaterialColor(theModel,new_mtl)
         }
 
-        function setMaterial(parent, mtl) {
+        function setMaterialColor(parent, mtl) {
             carBody.r = mtl.color.r
             carBody.g = mtl.color.g
             carBody.b = mtl.color.b
@@ -168,8 +170,8 @@
             fourthCamera: false,
         }
 
-        const gltfFolder = gui.addFolder("camera");
-        let moveCamera = gltfFolder.add(props,'firstCamera').name('firstMove').listen();
+        const gltfFolder = gui.addFolder("camera")
+        let moveCamera = gltfFolder.add(props,'firstCamera').name('firstMove').listen()
         moveCamera.onChange(
             function(e) {
                 if(e == true) {
@@ -238,6 +240,115 @@
             camera.position.set(1.3166716447391558, -1.877716388867218, -3.13906436539053)
             camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
         }
+
+        let modelProps = {
+            emission: false,
+            opacity: false,
+        }
+        const modelFolder = gui.addFolder("Model Inspector")
+        let opacity = modelFolder.add(modelProps, 'opacity').name('Opacity').listen()
+        opacity.onChange (
+            function(e) {
+                if(e == true) {
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            child.remove(child.children[0])
+                        }
+                    })
+                    modelProps.emission = false
+                } else {
+                    
+                }
+            }
+        )
+
+        let emission = modelFolder.add(modelProps, 'emission').name('Emission').listen()
+        emission.onChange (
+            function(e) {
+                if(e == true) {
+                    modelProps.opacity = false
+                    scene.remove(floor)
+                    scene.remove(hemiLight)
+                    scene.remove(dirLight)
+
+                    geometryProps.wireframe = false
+                    geometryProps.matcap = false
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            child.remove(child.children[0])
+                        }
+                    })
+                } else {
+                    scene.add(floor)
+                    scene.add(hemiLight)
+                    scene.add(dirLight)
+                }
+            }
+        )
+
+        let geometryProps = {
+            wireframe: false,
+            matcap: false,
+        }
+        let materialArr
+        const geometryFolder = gui.addFolder("geometry")
+        // matcap
+        let matcapValue = geometryFolder.add(geometryProps,'matcap').name('Matcap').listen()
+        matcapValue.onChange (
+            function(e) {
+                if(e == true) {
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            // console.log(child.material)
+                            materialArr = child.material
+                            child.remove(child.children[0])     //wireframe delete
+                            geometryProps.wireframe = false
+                            let matcapMaterial = new THREE.MeshMatcapMaterial()
+                            console.log(matcapMaterial)
+                            child.material = matcapMaterial
+                        }
+                    })
+                } else {
+                    // scene.remove(theModel)
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            // scene.remove(child)
+                            console.log(materialArr)
+                            theModel.traverse(function(child) {
+                                if(child.isMesh) {
+                                    child.material = materialArr
+                                }
+                            })
+                        }
+                    })
+                }
+            }
+        )
+        // wireframe
+        let wireframeValue = geometryFolder.add(geometryProps, 'wireframe').name('wireframe').listen()
+        wireframeValue.onChange (
+            function(e) {
+                if(e == true) {
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            geometryProps.matcap = false
+                            let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                            let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
+                            let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                            child.add(wireframe)
+                            // child.parent.attach(wireframe)
+                            // child.parent.remove(child)
+                        }
+                    })
+                } else {
+                    theModel.traverse(function(child) {
+                        if(child.isMesh) {
+                            child.remove(child.children[0])
+                        }
+                    })
+                }
+            }
+        )
         
         function animate() {
             requestAnimationFrame(animate)
