@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="./viewer3D_1.css">
     <title>Three.js - Fundamentals with light</title>
   </head>
 <body>
@@ -32,11 +33,10 @@
         const TRAY = document.getElementById('js-tray-slide')
 
         const canvas = document.querySelector('#c')
-        
         const clock = new THREE.Clock()
         const gui = new GUI()
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true})
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.shadowMap.enabled = true
@@ -45,11 +45,17 @@
         document.body.appendChild(renderer.domElement)
 
         const controls = new OrbitControls(camera, renderer.domElement)
+        // controls.maxPolarAngle = Math.PI/2
+        // controls.minPolarAngle = Math.PI/3
+        controls.enablePan = false
+        controls.dampingFactor = 0.1
+        controls.autoRotate = false
+        controls.autoRotateSpeed = 0.2
         function setCamera() {
             camera.position.set(10,5,17)
             controls.enableDamping = true
             // controls.minDistance = 1
-            controls.maxDistance = 10
+            // controls.maxDistance = 10
             controls.update()
         }
         setCamera()
@@ -80,8 +86,8 @@
             parent.traverse((o) => {
                 if(o.isMesh) {
                     if(o.name.includes(type)) {
-                        o.material = mtl;
-                        o.nameID = typel;
+                        o.material = mt
+                        o.nameID = typel
                     }
                 }
             })
@@ -118,8 +124,7 @@
         floor.position.y = -1
         scene.add(floor)
 
-        const colors = [{color:'66533C'},{color:'173A2F'},{color:'153944'},{color:'27548D'},{color:'438AAC'}]
-
+        const colors = [ {color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'} ]
 
         function buildColors(colors) {
             for (let [i, color] of colors.entries()) {
@@ -131,6 +136,30 @@
             }
         }
         buildColors(colors);
+
+        // Swatches
+        const swatches = document.querySelectorAll(".tray__swatch");
+        for (const swatch of swatches) {
+            swatch.addEventListener('click', selectSwatch);
+        }
+
+        let carBody = theModel.children[0].children[0].children[0].children[1].children[0].material.color
+
+        function selectSwatch(e) {
+            let color = colors[parseInt(e.target.dataset.key)]
+            let new_mtl;
+            new_mtl = new THREE.MeshPhongMaterial({
+                color:parseInt('0x'+color.color),
+                shininess: color.shininess?color.shininess: 10
+            })
+            setMaterial(theModel,new_mtl)
+        }
+
+        function setMaterial(parent, mtl) {
+            carBody.r = mtl.color.r
+            carBody.g = mtl.color.g
+            carBody.b = mtl.color.b
+        }
 
         let props = {
             firstCamera: false,
@@ -226,13 +255,11 @@
         }
         window.addEventListener('resize', onWindowResize)
     </script>
-
+    <canvas id="c"></canvas>
     <div class="controls">
         <div id="js-tray" class="tray">
-            <div id="js-tray-slide" class="tray__slide">
-            </div>
+            <div id="js-tray-slide" class="tray__slide"></div>
         </div>
     </div>
-    <canvas id="c"></canvas>
 </body>
 </html>

@@ -37,7 +37,7 @@
         const material = new THREE.MeshPhongMaterial({color: 0x44aa88});
         const cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
-
+        console.log(cube)
         const canvas = document.querySelector('#c');
         const renderer = new THREE.WebGLRenderer({canvas});
         renderer.render(scene, camera);
