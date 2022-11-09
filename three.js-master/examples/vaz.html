@@ -251,6 +251,8 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opactiy
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
                 }
             })
         }
@@ -263,11 +265,50 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
-                    
+                    child.material.metalness = 10       // metalness
+                    child.material.roughness = 0        // roughness
                 }
             })
         }
         let metalnessBtn = modelFolder.add(props,'metalnessButton').name('Metalness')
+
+        // 거칠기
+        props.roughnessButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opacity
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 10       // roughness
+                }
+            })
+        }
+        let roughnessBtn = modelFolder.add(props,'roughnessButton').name('Roughness')
+
+        // 노멀 맵
+        props.normalButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opactiy
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
+
+                    // let ambientLight = new THREE.AmbientLight(0xffffff,300)
+                    // scene.add(ambientLight)
+
+                    // if(child.material.normalMap != null) {
+                    //     const normalTexture = new THREE.TextureLoader().load(
+                    //         './vaz/normalMap.jpg'
+                    //     )
+                    //     child.material.normalMap = normalTexture
+                    // }
+                }                
+            })
+        }
+        let normalBtn = modelFolder.add(props,'normalButton').name('Normal Map')
 
         // 불투명
         props.opacityButton = function() {
@@ -275,8 +316,9 @@
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
-                    console.log(child.material.opacity) // opactiy
-                    child.material.opacity = .7
+                    child.material.opacity = .7         // opactiy
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
                 }
             })
             // ambientLight = new THREE.AmbientLight(0xffffff,300)
@@ -295,6 +337,8 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
                 }
             })
             scene.remove(hemiLight)
@@ -318,6 +362,8 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
                     let matcapMaterial = new THREE.MeshMatcapMaterial()
                     child.material = matcapMaterial
                 }
@@ -331,6 +377,8 @@
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
+                    child.material.metalness = 0        // metalness
+                    child.material.roughness = 0        // roughness
                     if(child.children == '') {
                         let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
                         let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
