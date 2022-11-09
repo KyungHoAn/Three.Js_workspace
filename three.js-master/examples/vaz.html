@@ -59,12 +59,13 @@
             controls.update()
         }
         setCamera()
-
         let loader = new GLTFLoader()
 
         const vaz = await loader.loadAsync('./vaz/scene.gltf')
+        const vaz2 = await loader.loadAsync('./vaz/scene.gltf')
         // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
         let theModel = vaz.scene
+        let matModel = vaz2.scene
         scene.add(theModel)
 
         theModel.traverse((o)=> {
@@ -98,7 +99,8 @@
             initColor(theModel,object.childID, object.mtl)
         }
 
-        // let ambientLight = new THREE.AmbientLight(0xffffff,1)
+        let ambientLight
+        // let ambientLight = new THREE.AmbientLight(0xffffff,300)
         // scene.add(ambientLight)
         let hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,0.61)
         hemiLight.position.set(0,50,0)
@@ -115,16 +117,16 @@
         scene.fog = new THREE.Fog(background_color,20,100)
 
         //Floor
-        let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
-        let floorMaterial = new THREE.MeshPhongMaterial({
-            color: 0xeeeeee,
-            shininess:0
-        })
-        let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-        floor.rotation.x = -0.5*Math.PI
-        floor.receiveShadow = true
-        floor.position.y = -1
-        scene.add(floor)
+        // let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
+        // let floorMaterial = new THREE.MeshPhongMaterial({
+        //     color: 0xeeeeee,
+        //     shininess:0
+        // })
+        // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+        // floor.rotation.x = -0.5*Math.PI
+        // floor.receiveShadow = true
+        // floor.position.y = -1
+        // scene.add(floor)
 
         const colors = [ {color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'} ]
 
@@ -223,7 +225,6 @@
                 }
             }
         )
-
         function firstLocation() {
             camera.position.set(-0.3084007032967616, 2.170361374179901, -1.5484965123508034)
             camera.rotation.set(-3.0741919664475184, -0.04268037329315125, -3.138712485629328)
@@ -241,114 +242,116 @@
             camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
         }
 
-        let modelProps = {
-            emission: false,
-            opacity: false,
-        }
+        
         const modelFolder = gui.addFolder("Model Inspector")
-        let opacity = modelFolder.add(modelProps, 'opacity').name('Opacity').listen()
-        opacity.onChange (
-            function(e) {
-                if(e == true) {
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            child.remove(child.children[0])
-                        }
-                    })
-                    modelProps.emission = false
-                } else {
+        // 기본 color
+        props.baseButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opactiy
+                }
+            })
+        }
+        let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
+
+        // 금속성
+        props.metalnessButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opacity
                     
                 }
-            }
-        )
-
-        let emission = modelFolder.add(modelProps, 'emission').name('Emission').listen()
-        emission.onChange (
-            function(e) {
-                if(e == true) {
-                    modelProps.opacity = false
-                    scene.remove(floor)
-                    scene.remove(hemiLight)
-                    scene.remove(dirLight)
-
-                    geometryProps.wireframe = false
-                    geometryProps.matcap = false
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            child.remove(child.children[0])
-                        }
-                    })
-                } else {
-                    scene.add(floor)
-                    scene.add(hemiLight)
-                    scene.add(dirLight)
-                }
-            }
-        )
-
-        let geometryProps = {
-            wireframe: false,
-            matcap: false,
+            })
         }
-        let materialArr
+        let metalnessBtn = modelFolder.add(props,'metalnessButton').name('Metalness')
+
+        // 불투명
+        props.opacityButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    console.log(child.material.opacity) // opactiy
+                    child.material.opacity = .7
+                }
+            })
+            // ambientLight = new THREE.AmbientLight(0xffffff,300)
+            // scene.add(ambientLight)
+        }
+        let opacityBtn = modelFolder.add(props,'opacityButton').name('Opacity')
+
+        // 빛 x
+        props.emissionButton = function() {
+            if(scene.name == 'mat') {
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
+            }
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opacity
+                }
+            })
+            scene.remove(hemiLight)
+            scene.remove(dirLight)
+            scene.remove(ambientLight)
+        }
+        let emissionBtn = modelFolder.add(props, 'emissionButton').name('Emission')
+
         const geometryFolder = gui.addFolder("geometry")
         // matcap
-        let matcapValue = geometryFolder.add(geometryProps,'matcap').name('Matcap').listen()
-        matcapValue.onChange (
-            function(e) {
-                if(e == true) {
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            // console.log(child.material)
-                            materialArr = child.material
-                            child.remove(child.children[0])     //wireframe delete
-                            geometryProps.wireframe = false
-                            let matcapMaterial = new THREE.MeshMatcapMaterial()
-                            console.log(matcapMaterial)
-                            child.material = matcapMaterial
-                        }
-                    })
-                } else {
-                    // scene.remove(theModel)
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            // scene.remove(child)
-                            console.log(materialArr)
-                            theModel.traverse(function(child) {
-                                if(child.isMesh) {
-                                    child.material = materialArr
-                                }
-                            })
-                        }
-                    })
-                }
+        props.matcapButton = function() {
+            if(scene.name == ''){
+                scene.remove(theModel)
+                scene.add(matModel)
+                scene.name = 'mat'
             }
-        )
+            scene.add(hemiLight)
+            scene.add(dirLight)
+            scene.remove(ambientLight)
+            matModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opacity
+                    let matcapMaterial = new THREE.MeshMatcapMaterial()
+                    child.material = matcapMaterial
+                }
+            })
+        }
+        let matcapBtn = geometryFolder.add(props, 'matcapButton').name('Matcap')
+
         // wireframe
-        let wireframeValue = geometryFolder.add(geometryProps, 'wireframe').name('wireframe').listen()
-        wireframeValue.onChange (
-            function(e) {
-                if(e == true) {
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            geometryProps.matcap = false
-                            let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
-                            let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
-                            let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
-                            child.add(wireframe)
-                            // child.parent.attach(wireframe)
-                            // child.parent.remove(child)
-                        }
-                    })
-                } else {
-                    theModel.traverse(function(child) {
-                        if(child.isMesh) {
-                            child.remove(child.children[0])
-                        }
-                    })
+        props.wireframeButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.opacity = .2         // opacity
+                    if(child.children == '') {
+                        let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                        let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
+                        let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                        child.add(wireframe)
+                    }
                 }
+            })
+        }
+        let wireframeBtn = geometryFolder.add(props,'wireframeButton').name('Wireframe')
+
+        function sceneReset() {
+            if(scene.name == 'mat'){
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
             }
-        )
+            scene.add(hemiLight)
+            scene.add(dirLight)
+            scene.remove(ambientLight)
+        }
         
         function animate() {
             requestAnimationFrame(animate)
