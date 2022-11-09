@@ -107,9 +107,8 @@
             const matcapTexture = new THREE.TextureLoader().load('./burger/matcap-gold.png')
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    // console.log(matcapTexture)
-                    // child.parent.add(matcapTexture)
-                    // child.material = matcapTexture
+                    console.log(child.material.map)
+                    child.material.map = matcapTexture
                 }
             })
         }
