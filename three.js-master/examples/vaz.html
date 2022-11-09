@@ -75,30 +75,6 @@
             }
         })
 
-        const inital_mtl = new THREE.MeshPhongMaterial({color:0xf1f1f1, shininess: 10})
-        const inital_map = [
-            {childID: "back", mtl: inital_mtl},
-            {childID:"base", mtl: inital_mtl},
-            {childID:"cushions", mtl:inital_mtl},
-            {childID:"legs", mtl:inital_mtl},
-            {childID:"supports",mtl:inital_mtl},
-        ]
-
-        function initColor(parent, type, mtl) {
-            parent.traverse((o) => {
-                if(o.isMesh) {
-                    if(o.name.includes(type)) {
-                        o.material = mt
-                        o.nameID = typel
-                    }
-                }
-            })
-        }
-
-        for(let object of inital_map) {
-            initColor(theModel,object.childID, object.mtl)
-        }
-
         let ambientLight
         // let ambientLight = new THREE.AmbientLight(0xffffff,300)
         // scene.add(ambientLight)
