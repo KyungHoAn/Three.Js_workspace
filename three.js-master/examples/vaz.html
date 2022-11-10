@@ -334,6 +334,7 @@
             scene.add(hemiLight)
             scene.add(dirLight)
             scene.remove(ambientLight)
+            const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
             matModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
@@ -341,7 +342,8 @@
                     child.material.metalness = 0        // metalness
                     child.material.roughness = 0        // roughness
                     let matcapMaterial = new THREE.MeshMatcapMaterial()
-                    child.material = matcapMaterial
+                    child.material.map = matcapTexture
+                    // child.material = matcapMaterial
                 }
             })
         }
