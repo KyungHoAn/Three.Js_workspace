@@ -16,7 +16,8 @@
                 "OBJLoader" :"./jsm/loaders/OBJLoader.js",
                 "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
                 "GUI":"./jsm/libs/lil-gui.module.min.js",
-                "MTLLoader":"./jsm/loaders/MTLLoader.js"
+                "MTLLoader":"./jsm/loaders/MTLLoader.js",
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
             }
         }
     </script>
@@ -25,8 +26,10 @@
         import { OrbitControls } from 'OrbitControls'
         import { GUI } from 'GUI'
         import { OBJLoader } from 'OBJLoader'
-        import {MTLLoader} from 'MTLLoader'
-        import {GLTFLoader} from 'GLTFLoader'
+        import { MTLLoader } from 'MTLLoader'
+        import { GLTFLoader } from 'GLTFLoader'
+        import { VertexNormalsHelper } from 'VertexNormalsHelper'
+        // import { VertexTangentsHelper } from 'VertexTangentsHelper'
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -63,10 +66,13 @@
 
         const vaz = await loader.loadAsync('./vaz/scene.gltf')
         const vaz2 = await loader.loadAsync('./vaz/scene.gltf')
+        const vaz3 = await loader.loadAsync('./vaz/scene.gltf')
         // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
         let theModel = vaz.scene
         let matModel = vaz2.scene
+        let gridModel = vaz3.scene
         scene.add(theModel)
+        let helper
 
         theModel.traverse((o)=> {
             if(o.isMesh) {
@@ -92,7 +98,7 @@
         scene.background = new THREE.Color(background_color)
         scene.fog = new THREE.Fog(background_color,20,100)
 
-        //Floor
+        // Floor
         // let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
         // let floorMaterial = new THREE.MeshPhongMaterial({
         //     color: 0xeeeeee,
@@ -218,19 +224,18 @@
             camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
         }
 
+        const renderFolder = gui.addFolder('RENDER')
+        props.finalButton = function() {
+            sceneReset()
+            baseMaterial()
+        }
+        let final = renderFolder.add(props, 'finalButton').name('Final Render')
         
         const modelFolder = gui.addFolder("Model Inspector")
         // 기본 color
         props.baseButton = function() {
             sceneReset()
-            theModel.traverse(function(child) {
-                if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
-                    child.material.opacity = .2         // opactiy
-                    child.material.metalness = 0        // metalness
-                    child.material.roughness = 0        // roughness
-                }
-            })
+            baseMaterial()
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
@@ -265,24 +270,7 @@
         // 노멀 맵
         props.normalButton = function() {
             sceneReset()
-            theModel.traverse(function(child) {
-                if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
-                    child.material.opacity = .2         // opactiy
-                    child.material.metalness = 0        // metalness
-                    child.material.roughness = 0        // roughness
-
-                    // let ambientLight = new THREE.AmbientLight(0xffffff,300)
-                    // scene.add(ambientLight)
-
-                    // if(child.material.normalMap != null) {
-                    //     const normalTexture = new THREE.TextureLoader().load(
-                    //         './vaz/normalMap.jpg'
-                    //     )
-                    //     child.material.normalMap = normalTexture
-                    // }
-                }                
-            })
+            baseMaterial()
         }
         let normalBtn = modelFolder.add(props,'normalButton').name('Normal Map')
 
@@ -293,7 +281,7 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .7         // opactiy
-                    child.material.metalness = 0        // metalness
+                    child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
                 }
             })
@@ -304,19 +292,13 @@
 
         // 빛 x
         props.emissionButton = function() {
-            if(scene.name == 'mat') {
+            if(scene.name == 'mat' || scene.name == 'grid') {
                 scene.remove(matModel)
+                scene.remove(gridModel)
                 scene.add(theModel)
                 scene.name = ''
             }
-            theModel.traverse(function(child) {
-                if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
-                    child.material.opacity = .2         // opacity
-                    child.material.metalness = 0        // metalness
-                    child.material.roughness = 0        // roughness
-                }
-            })
+            baseMaterial()
             scene.remove(hemiLight)
             scene.remove(dirLight)
             scene.remove(ambientLight)
@@ -326,8 +308,9 @@
         const geometryFolder = gui.addFolder("geometry")
         // matcap
         props.matcapButton = function() {
-            if(scene.name == ''){
+            if(scene.name == '' || scene.name == 'grid'){
                 scene.remove(theModel)
+                scene.remove(gridModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
@@ -339,9 +322,9 @@
                 if(child.isMesh) {
                     child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
-                    child.material.metalness = 0        // metalness
+                    child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
-                    let matcapMaterial = new THREE.MeshMatcapMaterial()
+                    // let matcapMaterial = new THREE.MeshMatcapMaterial()
                     child.material.map = matcapTexture
                     // child.material = matcapMaterial
                 }
@@ -355,7 +338,7 @@
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
-                    child.material.metalness = 0        // metalness
+                    child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
                     if(child.children == '') {
                         let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
@@ -368,9 +351,61 @@
         }
         let wireframeBtn = geometryFolder.add(props,'wireframeButton').name('Wireframe')
 
-        function sceneReset() {
-            if(scene.name == 'mat'){
+        //Vertex Normals
+        props.vertexButton = function() {
+            sceneReset()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    helper = new VertexNormalsHelper(child, 0.06, 0xff0000 )
+                    scene.add(helper)
+                }
+            })
+        }
+        let vertexBtn = geometryFolder.add(props,'vertexButton').name('Vertex Normals')
+
+        // uv checker
+        const uvFolder = gui.addFolder('UV')
+        props.uvButton = function() {
+            baseMaterial()
+            if(scene.name == 'mat' || scene.name == ''){
+                scene.traverse(function(child){
+                    if(child.isLine) {
+                        let typeVertex = child.type
+                        // console.log(typeVertex)
+                        // scene.remove(typeVertex)
+                    }
+                })
                 scene.remove(matModel)
+                scene.remove(theModel)
+                scene.add(gridModel)
+                scene.name = 'grid'
+            }
+            const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
+            gridModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.map = gridTexture
+                }
+            })
+
+        }
+        let uvBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
+
+                
+        function baseMaterial() {
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])     // wireframe
+                    child.material.opacity = .2         // opactiy
+                    child.material.metalness = 1        // metalness
+                    child.material.roughness = 0        // roughness
+                }
+            })
+        }
+
+        function sceneReset() {
+            if(scene.name == 'mat' || scene.name == 'grid'){
+                scene.remove(matModel)
+                scene.remove(gridModel)
                 scene.add(theModel)
                 scene.name = ''
             }
@@ -381,9 +416,6 @@
         
         function animate() {
             requestAnimationFrame(animate)
-            // vaz.scene.children[0].rotation.z += 0.001
-            // console.log(camera.position)
-            // console.log(camera.rotation)
             renderer.render(scene, camera)
         }        
         animate()
