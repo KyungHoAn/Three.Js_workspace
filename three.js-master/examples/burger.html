@@ -69,8 +69,8 @@
             }
         })
 
-        // let ambientLight = new THREE.AmbientLight(0xffffff, 1)
-        // scene.add(ambientLight)
+        let ambientLight = new THREE.AmbientLight(0xffffff, 1)
+        scene.add(ambientLight)
         // let hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,0.61)
         // hemiLight.position.set(0,50,0)
         // scene.add(hemiLight)
@@ -123,15 +123,16 @@
         }
         
         let props = {}
+        const renderFolder = gui.addFolder("RENDER")
+        props.finalButton = function() {
+            baseFunc()
+        }
+        let FinalBtn = renderFolder.add(props, 'finalButton').name('Final Render')
+
         const materialFolder = gui.addFolder("Emission")
         // basic color
         props.baseButton = function() {
-            if(scene.name == 'burger' || scene.name == 'mat'){
-                scene.remove(goldModel)
-                scene.remove(matModel)
-                scene.add(theModel)
-                scene.name = ''
-            }
+            baseFunc()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.color.r = 1
@@ -144,12 +145,7 @@
 
         // 빛 x
         props.emissionButton = function() {
-            if(scene.name == 'burger' || scene.name == 'mat') {
-                scene.remove(goldModel)
-                scene.remove(matModel)
-                scene.add(theModel)
-                scene.name = ''
-            }
+            baseFunc()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.color.r = 0
@@ -199,6 +195,15 @@
             })
         }
         let wireFrameBtn = geometryFolder.add(props,'wireFrameButton').name('Wireframe')
+
+        function baseFunc() {
+            if(scene.name == 'burger' || scene.name == 'mat'){
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
+            }
+        }
 
         function animate() {
             requestAnimationFrame(animate)

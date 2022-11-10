@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="./vaz.css">
+    <title>Three.js - Fundamentals with light</title>
+  </head>
+<body>
+    <script type="importmap">
+        {
+            "imports" : {
+                "three" : "../build/three.module.js",
+                "OrbitControls" : "./jsm/controls/OrbitControls.js",
+                "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                "OBJLoader" :"./jsm/loaders/OBJLoader.js",
+                "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
+                "GUI":"./jsm/libs/lil-gui.module.min.js",
+                "MTLLoader":"./jsm/loaders/MTLLoader.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three'
+        import { OrbitControls } from 'OrbitControls'
+        import { GUI } from 'GUI'
+        import { OBJLoader } from 'OBJLoader'
+        import {MTLLoader} from 'MTLLoader'
+        import {GLTFLoader} from 'GLTFLoader'
+
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
+        const TRAY = document.getElementById('js-tray-slide')
+
+        const canvas = document.querySelector('#c')
+        const clock = new THREE.Clock()
+        const gui = new GUI()
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+        let autoE = false
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.shadowMap.enabled = true
+        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap
+        document.body.appendChild(renderer.domElement)
+
+        const controls = new OrbitControls(camera, renderer.domElement)
+        
+        function setCamera() {
+            camera.position.set(0,1,3)
+            // controls.enableDamping = true
+            controls.maxDistance = 2.5
+            controls.update()
+        }
+        setCamera()
+        let loader = new GLTFLoader()
+
+        const burger = await loader.loadAsync('./numbers/scene.gltf')
+        const burger2 = await loader.loadAsync('./numbers/scene.gltf')
+        const burger3 = await loader.loadAsync('./numbers/scene.gltf')
+        const burger4 = await loader.loadAsync('./numbers/scene.gltf')
+        let theModel = burger.scene
+        let normalModel = burger2.scene
+        let goldModel = burger3.scene
+        let matModel = burger4.scene
+        scene.add(theModel)
+
+        const normalTexture = new THREE.TextureLoader().load('./numbers/textures/numbers1_normal.png')
+
+        theModel.traverse((o) => {
+            if(o.isMesh) {
+                o.castShadow = true
+                o.receiveShadow = true
+            }
+        })
+
+        let hemiLight
+        let dirLight
+        let floor
+
+        function finalRender() {
+            // let ambientLight = new THREE.AmbientLight(0xffffff, 5)
+            // scene.add(ambientLight)
+            hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,9.61)
+            hemiLight.position.set(0,50,0)
+            scene.add(hemiLight)
+            dirLight = new THREE.DirectionalLight(0xffffff,9.54)
+            dirLight.position.set(-8,12,8)
+            dirLight.castShadow = true
+            dirLight.shadow.mapSize = new THREE.Vector2(1024,1024)
+            scene.add(dirLight)
+
+            const background_color = 0x9C47A5
+            scene.background = new THREE.Color(background_color)
+            scene.fog = new THREE.Fog(background_color,20,100)
+
+            //Floor
+            let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
+            let floorMaterial = new THREE.MeshPhongMaterial({
+                color: 0x080208,
+                shininess: 0
+            })
+            floor = new THREE.Mesh(floorGeometry, floorMaterial)
+            floor.rotation.x = -0.5 * Math.PI
+            floor.receiveShadow = true
+            floor.position.y = -0.01
+            scene.add(floor)
+        }
+        finalRender()
+
+        let props = {barColor: '#FFFFFF',}
+        const barColorCtrl = gui.addColor(props,'barColor').name('WIREFRAME').listen()
+        barColorCtrl.onChange(
+            function(newColor) {
+                theModel.traverse(function(child) {
+                    if(child.isMesh) {
+                        let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                        let wireframeMaterial = new THREE.LineBasicMaterial({color:newColor})
+                        let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                        child.add(wireframe)
+                    }
+                })
+            }
+        )
+
+        const renderFolder = gui.addFolder("RENDER")
+        props.finalButton = function() {
+            scene.add(floor)
+            scene.add(dirLight)
+            backMaterial()
+        }
+        let finalBtn = renderFolder.add(props,'finalButton').name('Final Render')
+        props.noPostButton = function() {
+            scene.remove(floor)
+            scene.add(dirLight)
+            backMaterial()
+        }
+        let noPostBtn = renderFolder.add(props,'noPostButton').name('No Post-Processing')
+
+        const materialFolder = gui.addFolder("MATERIAL CHANNELS")
+        props.baseButton = function() {
+            scene.remove(floor)
+            scene.remove(dirLight)
+            backMaterial()
+        }
+        let baseBtn = materialFolder.add(props,'baseButton').name('Base Color')
+
+        // 금속성
+        props.metalnessButton = function() {
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+                scene.remove(normalModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
+            }
+            scene.remove(floor)
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.metalness = 1
+                    child.material.roughness = 0.1
+                }
+            })
+        }
+        let metalnessBtn = materialFolder.add(props, 'metalnessButton').name('Metalness')
+
+        // 이방성
+        props.anisotropyButton = function() {
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+                scene.remove(normalModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
+            }
+            scene.remove(floor)
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.metalness = 0.8
+                    child.material.roughness = 1
+                }
+            })
+        }
+        let anisotropyBtn = materialFolder.add(props,'anisotropyButton').name('Anisotropy')
+
+        // 거칠기
+        props.normalMapButton = function() {
+            scene.remove(floor)
+            if(scene.name == '' || scene.name == 'gold' || scene.name == 'mat'){
+                scene.remove(theModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.add(normalModel)
+                scene.name = 'normal'
+            }
+            normalModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.map = normalTexture
+                }
+            })
+        }
+        let normalBtn = materialFolder.add(props,'normalMapButton').name('Normal Map')
+
+        // 반사광
+        props.specularButton = function() {
+            scene.remove(floor)
+            backMaterial()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    // console.log(child.material.specular)
+                    ////////
+
+
+                    ////////
+                }
+            })
+        }
+        let specularBtn = materialFolder.add(props,'specularButton').name('Specular F0')
+        
+        const geometryFolder = gui.addFolder("GEOMETRY")
+        // Matcap 
+        props.matcapButton = function() {
+            scene.remove(floor)
+            if(scene.name == 'normal' || scene.name == '' || scene.name == 'mat') {
+                scene.remove(normalModel)
+                scene.remove(theModel)
+                scene.remove(matModel)
+                scene.add(goldModel)
+                scene.name = 'gold'
+            }
+            const matcapTexture = new THREE.TextureLoader().load('./numbers/matcap-gold.png')
+            goldModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])
+                    child.material.map = matcapTexture
+                }
+            })
+        }
+        let matcapBtn = geometryFolder.add(props,'matcapButton').name('Matcap')
+
+        // wireframess
+        props.wireframeButton = function() {
+            scene.remove(floor)
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == '') {
+                scene.remove(normalModel)
+                scene.remove(theModel)
+                scene.remove(goldModel)
+                scene.add(matModel)
+                scene.name = 'mat'
+            }
+            matModel.traverse(function(child) {
+                if(child.isMesh) {
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+                    let matcapMaterial = new THREE.MeshMatcapMaterial()
+                    child.material = matcapMaterial
+                }
+            })
+        }
+        let wireframeBtn = geometryFolder.add(props,'wireframeButton').name('Wireframe')
+
+
+
+        function backMaterial() {
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+                scene.remove(normalModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.add(theModel)
+                scene.name = ''
+            }
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.remove(child.children[0])
+                    child.material.metalness = 0.8
+                    child.material.roughness = 0.1
+                }   
+            })
+        }
+
+        function animate() {
+            requestAnimationFrame(animate)
+            renderer.render(scene,camera)
+        }
+        animate()
+
+        function onWindowReSize() {
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(window.innerWidth, window.innerHeight)
+        }
+        window.addEventListener('resize',onWindowReSize)
+
+    </script>
+    <canvas id="c"></canvas>
+    <div class="controls">
+        <div id="js-tray" class="tray">
+            <div id="js-tray-slide" class="tray__slide"></div>
+        </div>
+    </div>
+</body>
+</html>
