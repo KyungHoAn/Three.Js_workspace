@@ -274,7 +274,8 @@
 
         // 노멀 맵
         props.normalButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire'){
+            sceneReset()
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(theModel)
@@ -409,7 +410,6 @@
             scene.remove(dirLight)
             scene.remove(ambientLight)
             scene.traverse(function(child){
-                // console.log(child)
                 if(child.isLine) {
                     child.visible = false
                 }
@@ -417,16 +417,22 @@
         }
         let emissionBtn = modelFolder.add(props, 'emissionButton').name('Emission')
 
-        // 반사광 F0
+        // 반사광 Specular F0
         props.specularButton = function() {
             sceneReset()
             baseMaterial()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    
+
+                    // Specular
+                    if(child.material.name != 'glass1') {
+                        let matcapMaterial = new THREE.MeshMatcapMaterial()
+                        child.material = matcapMaterial
+                        console.log(child.material)
+                    }
+                    //
                 }
             })
-
         }
         let specularBtn = modelFolder.add(props, 'specularButton').name('Specular F0')
 
@@ -453,10 +459,9 @@
                     child.material.map = matcapTexture
                 }
             })
-            scene.traverse(function(child){
-                // console.log(child)
+            scene.traverse(function(child) {
                 if(child.isLine) {
-                    child.visible = false
+                    child.visible = false   
                 }
             })
         }
@@ -464,7 +469,7 @@
 
         // wireframe
         props.wireframeButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == ''){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == '') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
@@ -570,6 +575,66 @@
             scene.add(dirLight)
             scene.remove(ambientLight)
         }
+
+        // setupPicking
+        function setupPicking() {
+            const raycaster = new THREE.Raycaster()
+            this._divContainer.addEventListener("db1click",this._onDb1Click.bine(this))
+            this._raycaster = raycaster
+        }
+
+        function _onDb1Click(event) {
+            const width = this._divContainer.clientWidth
+            const height = this._divContainer.clientHeight
+            const xy = {
+                x: (event.offsetX / width) *2-1,
+                y: -(event.offsetY / height) *2+1
+            }
+            this._raycaster.setFromcamera(xy, this._camera)
+
+            const cars = [];
+            this._scene.traverse(obj3d => {
+                if(obj3d.name === 'car') {
+                    cars.push(obj3d)
+                }
+            })
+
+            for(let i=0; i<cars.length; i++){
+                const car = cars[i]
+                const targets = this._raycaster.intersectObject(car)
+                if(targets.length > 0) {
+                    //더블클릭된 차 확대 코드
+                    this._zoomFit(car,70)
+                    return
+                }
+            }
+
+            // 더블클릭이 차위치가 아닌 경우
+            
+            const box = this._scene.getObjectByName('box')
+            //무대 확대 코드
+            this._zoomFit(box,45)
+        }
+
+        function _zoomFit(object3d, viewAngle) {
+            const box = new THREE.Box3().setFromObject(object3d)
+            const sizeBox = box.getSize(new THREE.Vector3()).length()
+            const centerBox = box.getCenter(new THREE.Vector3());
+
+            const direction = new THREE.Vector3(0,1,0)
+            direction.applyAxisAngle(new THREE.Vector3(1,0,0),
+            THREE.Math.degToRad(viewAngle));
+
+            const halfSizeModel = sizeBox * 0.5
+            const halfFov = THREE.Math.degToRad(this._camera.fov*.5);
+            const distance = halfSizeModel / Math.tan(galfFov)
+            const newPosition = new THREE.Vector3().copy(
+                direction.multiplyScalar(distance).add(centerBox)
+            );
+            this._camera.position.copy(newPosition)
+            this._controls.target.copy(centerBox)
+        }
+
         
         function animate() {
             requestAnimationFrame(animate)
