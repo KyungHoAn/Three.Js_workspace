@@ -16,7 +16,8 @@
                 "OBJLoader" :"./jsm/loaders/OBJLoader.js",
                 "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
                 "GUI":"./jsm/libs/lil-gui.module.min.js",
-                "MTLLoader":"./jsm/loaders/MTLLoader.js"
+                "MTLLoader":"./jsm/loaders/MTLLoader.js",
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
             }
         }
     </script>
@@ -27,6 +28,7 @@
         import { OBJLoader } from 'OBJLoader'
         import {MTLLoader} from 'MTLLoader'
         import {GLTFLoader} from 'GLTFLoader'
+        import { VertexNormalsHelper } from 'VertexNormalsHelper'
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -35,6 +37,7 @@
         const canvas = document.querySelector('#c')
         const clock = new THREE.Clock()
         const gui = new GUI()
+        let helper
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
@@ -59,10 +62,14 @@
         const burger2 = await loader.loadAsync('./numbers/scene.gltf')
         const burger3 = await loader.loadAsync('./numbers/scene.gltf')
         const burger4 = await loader.loadAsync('./numbers/scene.gltf')
+        const burger5 = await loader.loadAsync('./numbers/scene.gltf')
+        const burger6 = await loader.loadAsync('./numbers/scene.gltf')
         let theModel = burger.scene
         let normalModel = burger2.scene
         let goldModel = burger3.scene
         let matModel = burger4.scene
+        let gridModel = burger5.scene
+        let baseModel = burger6.scene
         scene.add(theModel)
 
         const normalTexture = new THREE.TextureLoader().load('./numbers/textures/numbers1_normal.png')
@@ -127,34 +134,74 @@
         props.finalButton = function() {
             scene.add(floor)
             scene.add(dirLight)
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             backMaterial()
         }
         let finalBtn = renderFolder.add(props,'finalButton').name('Final Render')
         props.noPostButton = function() {
             scene.remove(floor)
             scene.add(dirLight)
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             backMaterial()
         }
         let noPostBtn = renderFolder.add(props,'noPostButton').name('No Post-Processing')
 
+        //base color
         const materialFolder = gui.addFolder("MATERIAL CHANNELS")
         props.baseButton = function() {
             scene.remove(floor)
             scene.remove(dirLight)
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             backMaterial()
+            
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat' || scene.name == 'grid' || scene.name == ''){
+                scene.remove(normalModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(theModel)
+                scene.add(baseModel)
+                scene.name = 'base'
+            }
+            baseModel.traverse(function(child) {
+                if(child.isMesh) {
+                    //numbers1
+                    const numbersMap = new THREE.TextureLoader().load('./numbers/textures/numbers1_baseColor.jpeg')
+                    child.material.map = numbersMap
+                }
+            })
         }
         let baseBtn = materialFolder.add(props,'baseButton').name('Base Color')
 
         // 금속성
         props.metalnessButton = function() {
-            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat' || scene.name == 'grid' || scene.name == 'base'){
                 scene.remove(normalModel)
                 scene.remove(goldModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(theModel)
                 scene.name = ''
             }
             scene.remove(floor)
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.metalness = 1
@@ -166,14 +213,21 @@
 
         // 이방성
         props.anisotropyButton = function() {
-            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat' || scene.name == 'grid' || scene.name=='base'){
                 scene.remove(normalModel)
                 scene.remove(goldModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(theModel)
                 scene.name = ''
             }
             scene.remove(floor)
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.metalness = 0.8
@@ -186,13 +240,20 @@
         // 거칠기
         props.normalMapButton = function() {
             scene.remove(floor)
-            if(scene.name == '' || scene.name == 'gold' || scene.name == 'mat'){
+            if(scene.name == '' || scene.name == 'gold' || scene.name == 'mat' || scene.name == 'grid' || scene.name == 'base'){
                 scene.remove(theModel)
                 scene.remove(goldModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(normalModel)
                 scene.name = 'normal'
             }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             normalModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.map = normalTexture
@@ -205,11 +266,15 @@
         props.specularButton = function() {
             scene.remove(floor)
             backMaterial()
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     // console.log(child.material.specular)
                     ////////
-
 
                     ////////
                 }
@@ -221,13 +286,20 @@
         // Matcap 
         props.matcapButton = function() {
             scene.remove(floor)
-            if(scene.name == 'normal' || scene.name == '' || scene.name == 'mat') {
+            if(scene.name == 'normal' || scene.name == '' || scene.name == 'mat' || scene.name == 'grid' || scene.name == 'base') {
                 scene.remove(normalModel)
                 scene.remove(theModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(goldModel)
                 scene.name = 'gold'
             }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             const matcapTexture = new THREE.TextureLoader().load('./numbers/matcap-gold.png')
             goldModel.traverse(function(child) {
                 if(child.isMesh) {
@@ -241,13 +313,20 @@
         // wireframess
         props.wireframeButton = function() {
             scene.remove(floor)
-            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == '') {
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == '' || scene.name == 'grid' || scene.name == 'base') {
                 scene.remove(normalModel)
                 scene.remove(theModel)
                 scene.remove(goldModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             matModel.traverse(function(child) {
                 if(child.isMesh) {
                     let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
@@ -261,13 +340,53 @@
         }
         let wireframeBtn = geometryFolder.add(props,'wireframeButton').name('Wireframe')
 
+        // Vertex Normals
+        props.vertexButton = function() {
+            scene.remove(floor)
+            backMaterial()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    helper = new VertexNormalsHelper(child, 0.01, 0xff0000)
+                    scene.add(helper)
+                }
+            })
+        }
+        let vertexBtn = geometryFolder.add(props,'vertexButton').name('Vertex Normals')
 
+        // uv checker
+        const uvFolder = gui.addFolder('UV')
+        props.uvButton = function() {
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == '' || scene.name == 'mat' || scene.name == 'base') {
+                scene.remove(normalModel)
+                scene.remove(theModel)
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.remove(baseModel)
+                scene.add(gridModel)
+                scene.name = 'grid'
+            }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
+            const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
+            gridModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.map = gridTexture
+                }
+            })
+
+        }
+        let uvBtn = uvFolder.add(props,'uvButton').name('UV Checker')
 
         function backMaterial() {
-            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat'){
+            if(scene.name == 'normal' || scene.name == 'gold' || scene.name == 'mat' || scene.name == 'grid' || scene.name =='base'){
                 scene.remove(normalModel)
                 scene.remove(goldModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(theModel)
                 scene.name = ''
             }

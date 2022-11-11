@@ -16,7 +16,8 @@
                 "OBJLoader" :"./jsm/loaders/OBJLoader.js",
                 "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
                 "GUI":"./jsm/libs/lil-gui.module.min.js",
-                "MTLLoader":"./jsm/loaders/MTLLoader.js"
+                "MTLLoader":"./jsm/loaders/MTLLoader.js",
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
             }
         }
     </script>
@@ -27,6 +28,7 @@
         import { OBJLoader } from 'OBJLoader'
         import {MTLLoader} from 'MTLLoader'
         import {GLTFLoader} from 'GLTFLoader'
+        import { VertexNormalsHelper } from 'VertexNormalsHelper'
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -35,6 +37,7 @@
         const canvas = document.querySelector('#c')
         const clock = new THREE.Clock()
         const gui = new GUI()
+        let helper
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
@@ -57,9 +60,13 @@
         const burger = await loader.loadAsync('./burger/scene.gltf')
         const burger2 = await loader.loadAsync('./burger/scene.gltf')
         const burger3 = await loader.loadAsync('./burger/scene.gltf')
+        const burger4 = await loader.loadAsync('./burger/scene.gltf')
+        const burger5 = await loader.loadAsync('./burger/scene.gltf')
         let theModel = burger.scene
         let goldModel = burger2.scene
         let matModel = burger3.scene
+        let gridModel = burger4.scene
+        let baseModel = burger5.scene
         scene.add(theModel)
 
         theModel.traverse((o) => {
@@ -103,14 +110,13 @@
                 color:parseInt('0x'+color.color),
                 shininess: color.shininess?color.shininess: 10
             })
-            setMterialColor(theModel, new_mtl)
+            setMterialColor(scene, new_mtl)
         }
 
         function setMterialColor(parent, mtl) {
             parent.traverse(function(child) {
                     if(child.isMesh) {
                         if(mtl.color.r == 1 && mtl.color.g == 1 && mtl.color.b == 1){
-                            // console.log(child.children[0])
                             child.remove(child.children[0])     // wireframe
                         } else {
                             let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
@@ -126,13 +132,11 @@
         const renderFolder = gui.addFolder("RENDER")
         props.finalButton = function() {
             baseFunc()
-        }
-        let FinalBtn = renderFolder.add(props, 'finalButton').name('Final Render')
-
-        const materialFolder = gui.addFolder("Emission")
-        // basic color
-        props.baseButton = function() {
-            baseFunc()
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.color.r = 1
@@ -141,11 +145,143 @@
                 }
             })
         }
+        let FinalBtn = renderFolder.add(props, 'finalButton').name('Final Render')
+
+        const materialFolder = gui.addFolder("Emission")
+        // basic color
+        props.baseButton = function() {
+            if(scene.name == 'burger' || scene.name == 'mat' || scene.name == 'grid' || scene.name == ''){
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(theModel)
+                scene.add(baseModel)
+                scene.name = 'base'
+            }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
+            baseModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.color.r = 1
+                    child.material.color.g = 1
+                    child.material.color.b = 1
+
+                    // Bacon
+                    if(child.material.name == 'Bacon'){
+                        const BaconMap = new THREE.TextureLoader().load('./burger/textures/Bacon_baseColor.png')
+                        child.material.map = BaconMap
+                    }
+                    // BBQ_Dip
+                    if(child.material.name == 'BBQ_Dip') {
+                        const BBQ_DipMap = new THREE.TextureLoader().load('./burger/textures/BBQ_Dip_baseColor.png')
+                        child.material.map = BBQ_DipMap
+                    }
+                    // Cheese
+                    if(child.material.name == 'Cheese') {
+                        const CheeseMap = new THREE.TextureLoader().load('./burger/textures/Cheese_baseColor.png')
+                        child.material.map = CheeseMap
+                    }
+                    // Cola
+                    if(child.material.name == 'Cola') {
+                        const ColaMap = new THREE.TextureLoader().load('./burger/textures/Cola_baseColor.png')
+                        child.material.map = ColaMap
+                    }
+                    // Fizz
+                    if(child.material.name == 'Fizz') {
+                        const FizzMap = new THREE.TextureLoader().load('./burger/textures/Fizz_baseColor.png')
+                        child.material.map = FizzMap
+                    }
+                    // Fries
+                    if(child.material.name == 'Fries') {
+                        const FriesMap = new THREE.TextureLoader().load('./burger/textures/Fries_baseColor.png')
+                        child.material.map = FriesMap
+                    }
+                    // Kean
+                    if(child.material.name == 'Kean') {
+                        const KeanMap = new THREE.TextureLoader().load('./burger/textures/Kean_baseColor.png')
+                        child.material.map = KeanMap
+                    }
+                    // Ketchup
+                    if(child.material.name == 'Ketchup') {
+                        const KetchupMap = new THREE.TextureLoader().load('./burger/textures/Ketchup_baseColor.png')
+                        child.material.map = KetchupMap
+                    }
+                    // Ketchup_Dip
+                    if(child.material.name == 'Ketchup_Dip') {
+                        const Ketchup_DipMap = new THREE.TextureLoader().load('./burger/textures/Ketchup_Dip_baseColor.png')
+                        child.material.map = Ketchup_DipMap
+                    }
+                    // Lettuce
+                    if(child.material.name == 'Lettuce') {
+                        const LettuceMap = new THREE.TextureLoader().load('./burger/textures/Lettuce_baseColor.png')
+                        child.material.map = LettuceMap
+                    }
+                    // material_4
+                    if(child.material.name == 'material_4') {
+                        const material_4Map = new THREE.TextureLoader().load('./burger/textures/material_4_baseColor.png')
+                        child.material.map = material_4Map
+                    }
+                    // material_15
+                    if(child.material.name == 'material_15') {
+                        const material_15Map = new THREE.TextureLoader().load('./burger/textures/material_15_baseColor.png')
+                        child.material.map = material_15Map
+                    }
+                    // material_19
+                    if(child.material.name == 'material_19') {
+                        const material_19Map = new THREE.TextureLoader().load('./burger/textures/material_19_baseColor.png')
+                        child.material.map = material_19Map
+                    }
+                    // material
+                    if(child.material.name == 'material') {
+                        const materialMap = new THREE.TextureLoader().load('./burger/textures/material_baseColor.png')
+                        child.material.map = materialMap
+                    }
+                    // Mayo
+                    if(child.material.name == 'Mayo') {
+                        const MayoMap = new THREE.TextureLoader().load('./burger/textures/Mayo_baseColor.png')
+                        child.material.map = MayoMap
+                    }
+                    // Mayo_Dip
+                    if(child.material.name == 'Mayo_Dip') {
+                        const Mayo_DipMap = new THREE.TextureLoader().load('./burger/textures/Mayo_Dip_baseColor.png')
+                        child.material.map = Mayo_DipMap
+                    }
+                    // Onion
+                    if(child.material.name == 'Onion') {
+                        const OnionMap = new THREE.TextureLoader().load('./burger/textures/Onion_baseColor.png')
+                        child.material.map = OnionMap
+                    }
+                    // Patty
+                    if(child.material.name == 'Patty') {
+                        const PattyMap = new THREE.TextureLoader().load('./burger/textures/Patty_baseColor.png')
+                        child.material.map = PattyMap
+                    }
+                    // Pickles
+                    if(child.material.name == 'Pickles') {
+                        const PicklesMap = new THREE.TextureLoader().load('./burger/textures/Pickles_baseColor.png')
+                        child.material.map = PicklesMap
+                    }
+                    // Plate
+                    if(child.material.name == 'Plate') {
+                        const PlateMap = new THREE.TextureLoader().load('./burger/textures/Plate_baseColor.png')
+                        child.material.map = PlateMap
+                    }
+                }
+            })
+        }
         let baseBtn = materialFolder.add(props, 'baseButton').name('Base Color')
 
         // 빛 x
         props.emissionButton = function() {
             baseFunc()
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.color.r = 0
@@ -159,12 +295,19 @@
         const geometryFolder = gui.addFolder("GEOMETRY")
         // 금속
         props.matcapButton = function() {
-            if(scene.name == '' || scene.name == 'mat') {
+            if(scene.name == '' || scene.name == 'mat' || scene.name == 'grid' || scene.name == 'base') {
                 scene.remove(theModel)
                 scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(goldModel)
                 scene.name = 'burger'
             }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             const matcapTexture = new THREE.TextureLoader().load('./burger/matcap-gold.png')
             goldModel.traverse(function(child) {
                 if(child.isMesh) {
@@ -176,11 +319,19 @@
 
         // wireframe
         props.wireFrameButton = function() {
-            if(scene.name == 'burger' || scene.name == '') {
+            if(scene.name == 'burger' || scene.name == '' || scene.name == 'grid' || scene.name == 'base') {
                 scene.remove(goldModel)
+                scene.remove(gridModel)
+                scene.remove(theModel)
+                scene.remove(baseModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             matModel.traverse(function(child) {
                 if(child.isMesh) {
                     if(child.children == '') {
@@ -196,10 +347,50 @@
         }
         let wireFrameBtn = geometryFolder.add(props,'wireFrameButton').name('Wireframe')
 
-        function baseFunc() {
-            if(scene.name == 'burger' || scene.name == 'mat'){
+        // Vertex Normals
+        props.vertexButton = function() {
+            baseFunc()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    helper = new VertexNormalsHelper(child, 0.01, 0xff0000)
+                    scene.add(helper)
+                }
+            })
+        }
+        let vertexBtn = geometryFolder.add(props,'vertexButton').name('Vertex Normals')
+
+        // uv checker
+        const uvFolder = gui.addFolder('UV')
+        props.uvButton = function() {
+            if(scene.name == 'burger' || scene.name == 'mat' || scene.name == '' || scene.name == 'base'){
                 scene.remove(goldModel)
                 scene.remove(matModel)
+                scene.remove(theModel)
+                scene.remove(baseModel)
+                scene.add(gridModel)
+                scene.name = 'grid'
+            }
+
+            scene.traverse(function(child) {
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
+            const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
+            gridModel.traverse(function(child){
+                if(child.isMesh) {
+                    child.material.map = gridTexture
+                }
+            })
+        }
+        let uvBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
+
+        function baseFunc() {
+            if(scene.name == 'burger' || scene.name == 'mat' || scene.name == 'grid' || scene.name == 'base'){
+                scene.remove(goldModel)
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(baseModel)
                 scene.add(theModel)
                 scene.name = ''
             }

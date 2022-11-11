@@ -48,12 +48,6 @@
         document.body.appendChild(renderer.domElement)
 
         const controls = new OrbitControls(camera, renderer.domElement)
-        // controls.maxPolarAngle = Math.PI/2
-        // controls.minPolarAngle = Math.PI/3
-        // controls.enablePan = false
-        // controls.dampingFactor = 0.1
-        // controls.autoRotate = false
-        // controls.autoRotateSpeed = 0.2
         function setCamera() {
             camera.position.set(10,5,17)
             controls.enableDamping = true
@@ -68,11 +62,12 @@
         const vaz2 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz3 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz4 = await loader.loadAsync('./vaz/scene.gltf')
-        // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
+        const vaz5 = await loader.loadAsync('./vaz/scene.gltf')
         let theModel = vaz.scene
         let matModel = vaz2.scene
         let gridModel = vaz3.scene
         let normalModel = vaz4.scene
+        let wireModel = vaz5.scene
         scene.add(theModel)
         let helper
 
@@ -246,14 +241,12 @@
             sceneReset()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
                     child.material.metalness = 10       // metalness
                     child.material.roughness = 0        // roughness
                 }
             })
             scene.traverse(function(child){
-                // console.log(child)
                 if(child.isLine) {
                     child.visible = false
                 }
@@ -266,14 +259,12 @@
             sceneReset()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
                     child.material.metalness = 0        // metalness
                     child.material.roughness = 10       // roughness
                 }
             })
             scene.traverse(function(child){
-                // console.log(child)
                 if(child.isLine) {
                     child.visible = false
                 }
@@ -283,31 +274,30 @@
 
         // 노멀 맵
         props.normalButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == ''){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire'){
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(theModel)
+                scene.remove(wireModel)
                 scene.add(normalModel)
                 scene.name = 'normal'
             }
 
             scene.traverse(function(child){
-                // console.log(child)
                 if(child.isLine) {
                     child.visible = false
                 }
             })
             let carBody2 = normalModel.children[0].children[0].children[0].children[1].children[0].material.color
-            // carBody
             normalModel.traverse(function(child) {
                 carBody2.r = 0
                 carBody2.g = 0
                 carBody2.b = 0
-                if(child.isMesh){
-                    if(child.material.name == 'carcass2'){
-                        child.material.color.r =0
-                        child.material.color.g =0
-                        child.material.color.b =0
+                if(child.isMesh) {
+                    if(child.material.name == 'carcass2') {
+                        child.material.color.r = 0
+                        child.material.color.g = 0
+                        child.material.color.b = 0
                     }
                     // chairs
                     if(child.material.name == 'chairs') {
@@ -330,17 +320,17 @@
                         child.material.map = engineMap2
                     }
                     // engine3
-                    if(child.material.name == 'engine3'){
+                    if(child.material.name == 'engine3') {
                         const engineMap3 = new THREE.TextureLoader().load('./vaz/textures/engine3_normal.png')
                         child.material.map = engineMap3
                     }
                     // lights
-                    if(child.material.name == 'lights'){
+                    if(child.material.name == 'lights') {
                         const lightsMap = new THREE.TextureLoader().load('./vaz/textures/lights_normal.png')
                         child.material.map = lightsMap
                     }
                     // salon1
-                    if(child.material.name == 'salon1'){
+                    if(child.material.name == 'salon1') {
                         const salonMap1 = new THREE.TextureLoader().load('./vaz/textures/salon1_normal.png')
                         child.material.map = salonMap1
                     }
@@ -350,32 +340,32 @@
                         child.material.map = salonMap3
                     }
                     // salon4
-                    if(child.material.name == 'salon4'){
+                    if(child.material.name == 'salon4') {
                         const salonMap4 = new THREE.TextureLoader().load('./vaz/textures/salon4_normal.png')
                         child.material.map = salonMap4
                     }
                     // salon5
-                    if(child.material.name == 'salon5'){
+                    if(child.material.name == 'salon5') {
                         const salonMap5 = new THREE.TextureLoader().load('./vaz/textures/salon5_normal.png')
                         child.material.map = salonMap5
                     }
                     // salon6
-                    if(child.material.name == 'salon6'){
+                    if(child.material.name == 'salon6') {
                         const salonMap6 = new THREE.TextureLoader().load('./vaz/textures/salon6_normal.png')
                         child.material.map = salonMap6
                     }
                     // stuff
-                    if(child.material.name == 'stuff'){
+                    if(child.material.name == 'stuff') {
                         const stuffMap = new THREE.TextureLoader().load('./vaz/textures/stuff_normal.png')
                         child.material.map = stuffMap
-                    }
+                    }   
                     // tubes
-                    if(child.material.name == 'tubes'){
+                    if(child.material.name == 'tubes') {
                         const tubes = new THREE.TextureLoader().load('./vaz/textures/tubes_normal.png')
                         child.material.map = tubes
                     }
                     // wheels
-                    if(child.material.name == 'wheels'){
+                    if(child.material.name == 'wheels') {
                         const wheelsMap = new THREE.TextureLoader().load('./vaz/textures/wheels_normal.png')
                         child.material.map = wheelsMap
                     }
@@ -389,7 +379,6 @@
             sceneReset()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
                     child.material.opacity = .7         // opactiy
                     child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
@@ -407,10 +396,11 @@
 
         // 빛 x
         props.emissionButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
-                sccene.remove(normalModel)
+                scene.remove(normalModel)
+                scene.remove(wireModel)
                 scene.add(theModel)
                 scene.name = ''
             }
@@ -427,13 +417,27 @@
         }
         let emissionBtn = modelFolder.add(props, 'emissionButton').name('Emission')
 
+        // 반사광 F0
+        props.specularButton = function() {
+            sceneReset()
+            baseMaterial()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    
+                }
+            })
+
+        }
+        let specularBtn = modelFolder.add(props, 'specularButton').name('Specular F0')
+
         const geometryFolder = gui.addFolder("geometry")
         // matcap
         props.matcapButton = function() {
-            if(scene.name == '' || scene.name == 'grid' || scene.name == 'normal'){
+            if(scene.name == '' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire'){
                 scene.remove(theModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
+                scene.remove(wireModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
@@ -443,13 +447,10 @@
             const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
             matModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opacity
                     child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
-                    // let matcapMaterial = new THREE.MeshMatcapMaterial()
                     child.material.map = matcapTexture
-                    // child.material = matcapMaterial
                 }
             })
             scene.traverse(function(child){
@@ -463,36 +464,51 @@
 
         // wireframe
         props.wireframeButton = function() {
-            sceneReset()
-            scene.traverse(function(child){
-                // console.log(child)
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == ''){
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(normalModel)
+                scene.remove(theModel)
+                scene.add(wireModel)
+                scene.name = 'wire'
+            }
+            scene.add(hemiLight)
+            scene.add(dirLight)
+            scene.remove(ambientLight)
+            
+            scene.traverse(function(child) {
                 if(child.isLine) {
                     child.visible = false
                 }
             })
-            theModel.traverse(function(child) {
+            wireModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
                     child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
-                    if(child.children == '') {
-                        let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
-                        let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
-                        let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
-                        child.add(wireframe)
+
+                    // if(child.children == '') {
+                    // }
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+
+                    if(child.material.name != 'glass1') {
+                        let matcapMaterial = new THREE.MeshMatcapMaterial()
+                        child.material = matcapMaterial
                     }
                 }
             })
         }
         let wireframeBtn = geometryFolder.add(props,'wireframeButton').name('Wireframe')
 
-        //Vertex Normals
+        // Vertex Normals
         props.vertexButton = function() {
             sceneReset()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     helper = new VertexNormalsHelper(child, 0.06, 0xff0000 )
-                    child.remove(child.children[0])     // wireframe
                     scene.add(helper)
                 }
             })
@@ -503,9 +519,8 @@
         const uvFolder = gui.addFolder('UV')
         props.uvButton = function() {
             baseMaterial()
-            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal'){
+            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal' || scene.name == 'wire'){
                 scene.traverse(function(child){
-                    // console.log(child)
                     if(child.isLine) {
                         child.visible = false
                     }
@@ -513,6 +528,7 @@
                 scene.remove(matModel)
                 scene.remove(theModel)
                 scene.remove(normalModel)
+                scene.remove(wireModel)
                 scene.add(gridModel)
                 scene.name = 'grid'
             }
@@ -520,7 +536,6 @@
             gridModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.map = gridTexture
-                    child.remove(child.children[0])     // wireframe
                 }
             })
 
@@ -530,14 +545,12 @@
         function baseMaterial() {
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.remove(child.children[0])     // wireframe
                     child.material.opacity = .2         // opactiy
                     child.material.metalness = 1        // metalness
                     child.material.roughness = 0        // roughness
                 }
             })
             scene.traverse(function(child){
-                // console.log(child)
                 if(child.isLine) {
                     child.visible = false
                 }
@@ -545,10 +558,11 @@
         }
         
         function sceneReset() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal'){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire'){
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
+                scene.remove(wireModel)
                 scene.add(theModel)
                 scene.name = ''
             }
