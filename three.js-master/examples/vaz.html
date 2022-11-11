@@ -67,10 +67,12 @@
         const vaz = await loader.loadAsync('./vaz/scene.gltf')
         const vaz2 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz3 = await loader.loadAsync('./vaz/scene.gltf')
+        const vaz4 = await loader.loadAsync('./vaz/scene.gltf')
         // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
         let theModel = vaz.scene
         let matModel = vaz2.scene
         let gridModel = vaz3.scene
+        let normalModel = vaz4.scene
         scene.add(theModel)
         let helper
 
@@ -234,8 +236,8 @@
         const modelFolder = gui.addFolder("Model Inspector")
         // 기본 color
         props.baseButton = function() {
-            sceneReset()
             baseMaterial()
+            sceneReset()
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
@@ -248,6 +250,12 @@
                     child.material.opacity = .2         // opacity
                     child.material.metalness = 10       // metalness
                     child.material.roughness = 0        // roughness
+                }
+            })
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
                 }
             })
         }
@@ -264,13 +272,115 @@
                     child.material.roughness = 10       // roughness
                 }
             })
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
         }
         let roughnessBtn = modelFolder.add(props,'roughnessButton').name('Roughness')
 
         // 노멀 맵
         props.normalButton = function() {
-            sceneReset()
-            baseMaterial()
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == ''){
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(theModel)
+                scene.add(normalModel)
+                scene.name = 'normal'
+            }
+
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
+            let carBody2 = normalModel.children[0].children[0].children[0].children[1].children[0].material.color
+            // carBody
+            normalModel.traverse(function(child) {
+                carBody2.r = 0
+                carBody2.g = 0
+                carBody2.b = 0
+                if(child.isMesh){
+                    if(child.material.name == 'carcass2'){
+                        child.material.color.r =0
+                        child.material.color.g =0
+                        child.material.color.b =0
+                    }
+                    // chairs
+                    if(child.material.name == 'chairs') {
+                        const chairsMap = new THREE.TextureLoader().load('./vaz/textures/chairs_normal.png')
+                        child.material.map = chairsMap
+                    }
+                    // doorcards
+                    if(child.material.name == 'doorcards') {
+                        const doorcardsMap = new THREE.TextureLoader().load('./vaz/textures/doorcards_normal.png')
+                        child.material.map = doorcardsMap
+                    }
+                    // engine1
+                    if(child.material.name == 'engine1') {
+                        const engineMap1 = new THREE.TextureLoader().load('./vaz/textures/engine1_normal.png')
+                        child.material.map = engineMap1
+                    }
+                    // engine2
+                    if(child.material.name == 'engine2') {
+                        const engineMap2 = new THREE.TextureLoader().load('./vaz/textures/engine2_normal.png')
+                        child.material.map = engineMap2
+                    }
+                    // engine3
+                    if(child.material.name == 'engine3'){
+                        const engineMap3 = new THREE.TextureLoader().load('./vaz/textures/engine3_normal.png')
+                        child.material.map = engineMap3
+                    }
+                    // lights
+                    if(child.material.name == 'lights'){
+                        const lightsMap = new THREE.TextureLoader().load('./vaz/textures/lights_normal.png')
+                        child.material.map = lightsMap
+                    }
+                    // salon1
+                    if(child.material.name == 'salon1'){
+                        const salonMap1 = new THREE.TextureLoader().load('./vaz/textures/salon1_normal.png')
+                        child.material.map = salonMap1
+                    }
+                    // salon3
+                    if(child.material.name == 'salon3') {
+                        const salonMap3 = new THREE.TextureLoader().load('./vaz/textures/salon3_normal.png')
+                        child.material.map = salonMap3
+                    }
+                    // salon4
+                    if(child.material.name == 'salon4'){
+                        const salonMap4 = new THREE.TextureLoader().load('./vaz/textures/salon4_normal.png')
+                        child.material.map = salonMap4
+                    }
+                    // salon5
+                    if(child.material.name == 'salon5'){
+                        const salonMap5 = new THREE.TextureLoader().load('./vaz/textures/salon5_normal.png')
+                        child.material.map = salonMap5
+                    }
+                    // salon6
+                    if(child.material.name == 'salon6'){
+                        const salonMap6 = new THREE.TextureLoader().load('./vaz/textures/salon6_normal.png')
+                        child.material.map = salonMap6
+                    }
+                    // stuff
+                    if(child.material.name == 'stuff'){
+                        const stuffMap = new THREE.TextureLoader().load('./vaz/textures/stuff_normal.png')
+                        child.material.map = stuffMap
+                    }
+                    // tubes
+                    if(child.material.name == 'tubes'){
+                        const tubes = new THREE.TextureLoader().load('./vaz/textures/tubes_normal.png')
+                        child.material.map = tubes
+                    }
+                    // wheels
+                    if(child.material.name == 'wheels'){
+                        const wheelsMap = new THREE.TextureLoader().load('./vaz/textures/wheels_normal.png')
+                        child.material.map = wheelsMap
+                    }
+                }
+            })
         }
         let normalBtn = modelFolder.add(props,'normalButton').name('Normal Map')
 
@@ -285,6 +395,11 @@
                     child.material.roughness = 0        // roughness
                 }
             })
+            scene.traverse(function(child){
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             // ambientLight = new THREE.AmbientLight(0xffffff,300)
             // scene.add(ambientLight)
         }
@@ -292,9 +407,10 @@
 
         // 빛 x
         props.emissionButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
+                sccene.remove(normalModel)
                 scene.add(theModel)
                 scene.name = ''
             }
@@ -302,15 +418,22 @@
             scene.remove(hemiLight)
             scene.remove(dirLight)
             scene.remove(ambientLight)
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
         }
         let emissionBtn = modelFolder.add(props, 'emissionButton').name('Emission')
 
         const geometryFolder = gui.addFolder("geometry")
         // matcap
         props.matcapButton = function() {
-            if(scene.name == '' || scene.name == 'grid'){
+            if(scene.name == '' || scene.name == 'grid' || scene.name == 'normal'){
                 scene.remove(theModel)
                 scene.remove(gridModel)
+                scene.remove(normalModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
@@ -329,12 +452,24 @@
                     // child.material = matcapMaterial
                 }
             })
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
         }
         let matcapBtn = geometryFolder.add(props, 'matcapButton').name('Matcap')
 
         // wireframe
         props.wireframeButton = function() {
             sceneReset()
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
@@ -357,6 +492,7 @@
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     helper = new VertexNormalsHelper(child, 0.06, 0xff0000 )
+                    child.remove(child.children[0])     // wireframe
                     scene.add(helper)
                 }
             })
@@ -367,16 +503,16 @@
         const uvFolder = gui.addFolder('UV')
         props.uvButton = function() {
             baseMaterial()
-            if(scene.name == 'mat' || scene.name == ''){
+            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal'){
                 scene.traverse(function(child){
+                    // console.log(child)
                     if(child.isLine) {
-                        let typeVertex = child.type
-                        // console.log(typeVertex)
-                        // scene.remove(typeVertex)
+                        child.visible = false
                     }
                 })
                 scene.remove(matModel)
                 scene.remove(theModel)
+                scene.remove(normalModel)
                 scene.add(gridModel)
                 scene.name = 'grid'
             }
@@ -384,13 +520,13 @@
             gridModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.map = gridTexture
+                    child.remove(child.children[0])     // wireframe
                 }
             })
 
         }
         let uvBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
 
-                
         function baseMaterial() {
             theModel.traverse(function(child) {
                 if(child.isMesh) {
@@ -400,12 +536,19 @@
                     child.material.roughness = 0        // roughness
                 }
             })
+            scene.traverse(function(child){
+                // console.log(child)
+                if(child.isLine) {
+                    child.visible = false
+                }
+            })
         }
-
+        
         function sceneReset() {
-            if(scene.name == 'mat' || scene.name == 'grid'){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal'){
                 scene.remove(matModel)
                 scene.remove(gridModel)
+                scene.remove(normalModel)
                 scene.add(theModel)
                 scene.name = ''
             }
