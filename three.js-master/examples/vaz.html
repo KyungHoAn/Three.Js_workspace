@@ -214,13 +214,20 @@
                 z: -1.5484965123508034
             })
             
-            gsap.to(camera.rotation, {
-                duration: 0.5,
-                x: -3.057089489107987,
-                y: -0.0679885531988692,
-                z: -3.1358381905682595,
-                delay: 0.8
-            })
+            if(camera.rotation.x == '-3.034487'){
+                gsap.to(camera.rotation, {
+                    duration: 0.5,
+                    y: -0.0679885531988692,
+                })
+            } else {
+                gsap.to(camera.rotation, {
+                    duration: 0.5,
+                    x: -3.057089489107987,
+                    y: -0.0679885531988692,
+                    z: -3.1358381905682595,
+                    delay: 0.4
+                })
+            }
         }
         function cuteLocation() {
             // camera.position.set(0.049280145157820913, 1.8263274174864204, 0.22265007992236185)
@@ -231,14 +238,22 @@
                 y: 1.8263274174864204,
                 z: 0.22265007992236185
             })
-            
-            gsap.to(camera.rotation, {
-                duration: 0.5,
-                x: -3.0344866460178874,
-                y: 0.09798769704992441,
-                z: 3.1310745046794355,
-                delay: 0.8
-            })
+        
+            if(camera.rotation.x == '-3.057089' && camera.rotation.y == '-0.067989' && camera.rotation.z == '-3.135838') {
+                console.log('first next')
+                gsap.to(camera.rotation, {
+                    duration: 0.5,
+                    y: 0.09798769704992441,
+                })
+            } else {
+                gsap.to(camera.rotation, {
+                    duration: 0.5,
+                    x: -3.0344866460178874,
+                    y: 0.09798769704992441,
+                    z: 3.1310745046794355,
+                    delay: 0.8
+                })
+            }
         }
         function carDn() {
             // camera.position.set(2.459045966438709, -2.1421204839954684, 5.410323829811498)
@@ -484,7 +499,6 @@
                     if(child.material.name != 'glass1') {
                         let matcapMaterial = new THREE.MeshMatcapMaterial()
                         child.material = matcapMaterial
-                        console.log(child.material)
                     }
                     //
                 }
