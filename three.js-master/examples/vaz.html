@@ -32,7 +32,7 @@
         import { VertexNormalsHelper } from 'VertexNormalsHelper'
 
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000)
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
         const TRAY = document.getElementById('js-tray-slide')
 
         const canvas = document.querySelector('#c')
@@ -49,7 +49,9 @@
 
         const controls = new OrbitControls(camera, renderer.domElement)
         function setCamera() {
-            camera.position.set(10,5,17)
+            // camera.position.set(10,5,17)
+            camera.position.set(3.663249037871437,3.2943829468143138,6.876483057858351)
+            camera.rotation.set(-0.24904790882362943,0.5073814726612403,0.12295216578395465)
             controls.enableDamping = true
             // controls.minDistance = 1
             // controls.maxDistance = 10
@@ -79,11 +81,15 @@
         })
 
         let ambientLight
-        // let ambientLight = new THREE.AmbientLight(0xffffff,300)
-        // scene.add(ambientLight)
         let hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,0.61)
-        hemiLight.position.set(0,50,0)
+        hemiLight.position.set(0,0,0)
         scene.add(hemiLight)
+
+        let pointLight = new THREE.PointLight()
+        pointLight.position.set(0,2,0)
+        pointLight.scale.set(0.05,0.05,0.05)
+        pointLight.intensity = 2.5
+        scene.add(pointLight)
 
         let dirLight = new THREE.DirectionalLight(0xffffff,0.54)
         dirLight.position.set(-8,12,8)
@@ -205,8 +211,6 @@
             }
         )
         function firstLocation() {
-            // camera.position.set(-0.3084007032967616, 2.170361374179901, -1.5484965123508034)
-            // camera.rotation.set(-3.057089489107987, -0.0679885531988692, -3.1358381905682595)
             gsap.to(camera.position,{
                 duration: 1,
                 x: -0.3084007032967616,
@@ -225,13 +229,11 @@
                     x: -3.057089489107987,
                     y: -0.0679885531988692,
                     z: -3.1358381905682595,
-                    delay: 0.4
+                    delay: 0.6
                 })
             }
         }
         function cuteLocation() {
-            // camera.position.set(0.049280145157820913, 1.8263274174864204, 0.22265007992236185)
-            // camera.rotation.set(-3.0344866460178874, 0.09798769704992441, 3.1310745046794355)
             gsap.to(camera.position,{
                 duration: 1,
                 x: 0.049280145157820913,
@@ -240,7 +242,6 @@
             })
         
             if(camera.rotation.x == '-3.057089' && camera.rotation.y == '-0.067989' && camera.rotation.z == '-3.135838') {
-                console.log('first next')
                 gsap.to(camera.rotation, {
                     duration: 0.5,
                     y: 0.09798769704992441,
@@ -256,8 +257,6 @@
             }
         }
         function carDn() {
-            // camera.position.set(2.459045966438709, -2.1421204839954684, 5.410323829811498)
-            // camera.rotation.set(0.8048158948029703, 0.5412204083012035, -0.4917114459662305)
             gsap.to(camera.position,{
                 duration: 1,
                 x: 2.459045966438709,
@@ -274,8 +273,6 @@
             })
         }
         function carDn2() {
-            // camera.position.set(1.3166716447391558, -1.877716388867218, -3.13906436539053)
-            // camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
             gsap.to(camera.position,{
                 duration: 1,
                 x: 1.3166716447391558,
@@ -292,10 +289,93 @@
             })
         }
 
+        const colorFolder = gui.addFolder('WIREFRAME')
+        props.returnButton = function() {
+            scene.traverse(function(child){
+                if(child.isMesh) {
+                    child.remove(child.children[0])
+                }
+            })
+        }
+        let whiteBtn = colorFolder.add(props, 'returnButton').name('Reset Wireframe')
+        props.blackButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#000000'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let blackBtn = colorFolder.add(props, 'blackButton').name('black Color')
+        props.grayButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#808080'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let grayBtn = colorFolder.add(props, 'grayButton').name('Gray Color')
+        props.radButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#FF0000'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let radBtn = colorFolder.add(props, 'radButton').name('Rad Color')
+        props.blueButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#000080'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let blueBtn = colorFolder.add(props, 'blueButton').name('Blue Color')
+        props.greenButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#00FF00'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let greenBtn = colorFolder.add(props, 'greenButton').name('Green Color')
+        props.yellowButton = function() {
+            scene.traverse(function(child){
+               if(child.isMesh) {
+                    child.remove(child.children[0])
+                    let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                    let wireframeMaterial = new THREE.LineBasicMaterial({color:'#FFFF00'})
+                    let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                    child.add(wireframe)
+               } 
+            })
+        }
+        let yellowBtn = colorFolder.add(props, 'yellowButton').name('Yellow Color')
+
         const renderFolder = gui.addFolder('RENDER')
         props.finalButton = function() {
             sceneReset()
             baseMaterial()
+            scene.add(pointLight)
         }
         let final = renderFolder.add(props, 'finalButton').name('Final Render')
         
@@ -304,6 +384,7 @@
         props.baseButton = function() {
             baseMaterial()
             sceneReset()
+            scene.add(pointLight)
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
@@ -317,6 +398,7 @@
                     child.material.roughness = 0        // roughness
                 }
             })
+            scene.add(pointLight)
             scene.traverse(function(child){
                 if(child.isLine) {
                     child.visible = false
@@ -328,6 +410,7 @@
         // 거칠기
         props.roughnessButton = function() {
             sceneReset()
+            scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
@@ -354,6 +437,7 @@
                 scene.add(normalModel)
                 scene.name = 'normal'
             }
+            scene.remove(pointLight)
 
             scene.traverse(function(child){
                 if(child.isLine) {
@@ -456,6 +540,7 @@
                     child.material.roughness = 0        // roughness
                 }
             })
+            scene.add(pointLight)
             scene.traverse(function(child){
                 if(child.isLine) {
                     child.visible = false
@@ -476,6 +561,7 @@
                 scene.add(theModel)
                 scene.name = ''
             }
+            scene.add(pointLight)
             baseMaterial()
             scene.remove(hemiLight)
             scene.remove(dirLight)
@@ -492,13 +578,13 @@
         props.specularButton = function() {
             sceneReset()
             baseMaterial()
+            scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-
                     // Specular
                     if(child.material.name != 'glass1') {
-                        let matcapMaterial = new THREE.MeshMatcapMaterial()
-                        child.material = matcapMaterial
+                        // let matcapMaterial = new THREE.MeshMatcapMaterial()
+                        // child.material = matcapMaterial
                     }
                     //
                 }
@@ -517,9 +603,11 @@
                 scene.add(matModel)
                 scene.name = 'mat'
             }
+            scene.add(pointLight)
             scene.add(hemiLight)
             scene.add(dirLight)
             scene.remove(ambientLight)
+
             const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
             matModel.traverse(function(child) {
                 if(child.isMesh) {
@@ -547,6 +635,7 @@
                 scene.add(wireModel)
                 scene.name = 'wire'
             }
+            scene.add(pointLight)
             scene.add(hemiLight)
             scene.add(dirLight)
             scene.remove(ambientLight)
@@ -581,6 +670,7 @@
         // Vertex Normals
         props.vertexButton = function() {
             sceneReset()
+            scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     helper = new VertexNormalsHelper(child, 0.06, 0xff0000 )
@@ -607,6 +697,7 @@
                 scene.add(gridModel)
                 scene.name = 'grid'
             }
+            scene.add(pointLight)
             const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
             gridModel.traverse(function(child) {
                 if(child.isMesh) {
