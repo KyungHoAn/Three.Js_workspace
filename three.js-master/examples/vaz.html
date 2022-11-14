@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <link rel="stylesheet" href="./vaz.css">
     <title>Three.js - Fundamentals with light</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
   </head>
 <body>
     <script type="importmap">
@@ -29,10 +30,9 @@
         import { MTLLoader } from 'MTLLoader'
         import { GLTFLoader } from 'GLTFLoader'
         import { VertexNormalsHelper } from 'VertexNormalsHelper'
-        // import { VertexTangentsHelper } from 'VertexTangentsHelper'
 
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
+        const camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.1, 1000)
         const TRAY = document.getElementById('js-tray-slide')
 
         const canvas = document.querySelector('#c')
@@ -153,12 +153,12 @@
 
         const gltfFolder = gui.addFolder("camera")
         let moveCamera = gltfFolder.add(props,'firstCamera').name('firstMove').listen()
-        moveCamera.onChange(
-            function(e) {
+        moveCamera.onChange (
+            function(e){
                 if(e == true) {
                     props.secondCamera = false
                     props.thirdCamera = false
-                    props.fourthCamera = false
+                    props.fourthCamera = false                         
                     firstLocation()
                 } else {
                     setCamera()
@@ -205,20 +205,76 @@
             }
         )
         function firstLocation() {
-            camera.position.set(-0.3084007032967616, 2.170361374179901, -1.5484965123508034)
-            camera.rotation.set(-3.0741919664475184, -0.04268037329315125, -3.138712485629328)
+            // camera.position.set(-0.3084007032967616, 2.170361374179901, -1.5484965123508034)
+            // camera.rotation.set(-3.057089489107987, -0.0679885531988692, -3.1358381905682595)
+            gsap.to(camera.position,{
+                duration: 1,
+                x: -0.3084007032967616,
+                y: 2.170361374179901,
+                z: -1.5484965123508034
+            })
+            
+            gsap.to(camera.rotation, {
+                duration: 0.5,
+                x: -3.057089489107987,
+                y: -0.0679885531988692,
+                z: -3.1358381905682595,
+                delay: 0.8
+            })
         }
         function cuteLocation() {
-            camera.position.set(0.049280145157820913, 1.8263274174864204, 0.22265007992236185)
-            camera.rotation.set(-3.0344866460178874, 0.09798769704992441, 3.1310745046794355)
+            // camera.position.set(0.049280145157820913, 1.8263274174864204, 0.22265007992236185)
+            // camera.rotation.set(-3.0344866460178874, 0.09798769704992441, 3.1310745046794355)
+            gsap.to(camera.position,{
+                duration: 1,
+                x: 0.049280145157820913,
+                y: 1.8263274174864204,
+                z: 0.22265007992236185
+            })
+            
+            gsap.to(camera.rotation, {
+                duration: 0.5,
+                x: -3.0344866460178874,
+                y: 0.09798769704992441,
+                z: 3.1310745046794355,
+                delay: 0.8
+            })
         }
         function carDn() {
-            camera.position.set(2.459045966438709, -2.1421204839954684, 5.410323829811498)
-            camera.rotation.set(0.8048158948029703, 0.5412204083012035, -0.4917114459662305)
+            // camera.position.set(2.459045966438709, -2.1421204839954684, 5.410323829811498)
+            // camera.rotation.set(0.8048158948029703, 0.5412204083012035, -0.4917114459662305)
+            gsap.to(camera.position,{
+                duration: 1,
+                x: 2.459045966438709,
+                y: -2.1421204839954684,
+                z: 5.410323829811498
+            })
+            
+            gsap.to(camera.rotation, {
+                duration: 0.5,
+                x: 0.8048158948029703,
+                y: 0.5412204083012035,
+                z: -0.4917114459662305,
+                delay: 0.4
+            })
         }
         function carDn2() {
-            camera.position.set(1.3166716447391558, -1.877716388867218, -3.13906436539053)
-            camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
+            // camera.position.set(1.3166716447391558, -1.877716388867218, -3.13906436539053)
+            // camera.rotation.set(2.105251008301363, 0.5339095515382513, -2.4314631483182185)
+            gsap.to(camera.position,{
+                duration: 1,
+                x: 1.3166716447391558,
+                y: -1.877716388867218,
+                z: -3.13906436539053
+            })
+            
+            gsap.to(camera.rotation, {
+                duration: 0.5,
+                x: 2.105251008301363,
+                y: 0.5339095515382513,
+                z: -2.4314631483182185,
+                delay: 0.4
+            })
         }
 
         const renderFolder = gui.addFolder('RENDER')
@@ -576,66 +632,6 @@
             scene.remove(ambientLight)
         }
 
-        // setupPicking
-        function setupPicking() {
-            const raycaster = new THREE.Raycaster()
-            this._divContainer.addEventListener("db1click",this._onDb1Click.bine(this))
-            this._raycaster = raycaster
-        }
-
-        function _onDb1Click(event) {
-            const width = this._divContainer.clientWidth
-            const height = this._divContainer.clientHeight
-            const xy = {
-                x: (event.offsetX / width) *2-1,
-                y: -(event.offsetY / height) *2+1
-            }
-            this._raycaster.setFromcamera(xy, this._camera)
-
-            const cars = [];
-            this._scene.traverse(obj3d => {
-                if(obj3d.name === 'car') {
-                    cars.push(obj3d)
-                }
-            })
-
-            for(let i=0; i<cars.length; i++){
-                const car = cars[i]
-                const targets = this._raycaster.intersectObject(car)
-                if(targets.length > 0) {
-                    //더블클릭된 차 확대 코드
-                    this._zoomFit(car,70)
-                    return
-                }
-            }
-
-            // 더블클릭이 차위치가 아닌 경우
-            
-            const box = this._scene.getObjectByName('box')
-            //무대 확대 코드
-            this._zoomFit(box,45)
-        }
-
-        function _zoomFit(object3d, viewAngle) {
-            const box = new THREE.Box3().setFromObject(object3d)
-            const sizeBox = box.getSize(new THREE.Vector3()).length()
-            const centerBox = box.getCenter(new THREE.Vector3());
-
-            const direction = new THREE.Vector3(0,1,0)
-            direction.applyAxisAngle(new THREE.Vector3(1,0,0),
-            THREE.Math.degToRad(viewAngle));
-
-            const halfSizeModel = sizeBox * 0.5
-            const halfFov = THREE.Math.degToRad(this._camera.fov*.5);
-            const distance = halfSizeModel / Math.tan(galfFov)
-            const newPosition = new THREE.Vector3().copy(
-                direction.multiplyScalar(distance).add(centerBox)
-            );
-            this._camera.position.copy(newPosition)
-            this._controls.target.copy(centerBox)
-        }
-
-        
         function animate() {
             requestAnimationFrame(animate)
             renderer.render(scene, camera)
