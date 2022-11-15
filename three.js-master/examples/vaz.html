@@ -710,8 +710,6 @@
                     child.visible = false
                 }
             })
-            // ambientLight = new THREE.AmbientLight(0xffffff,300)
-            // scene.add(ambientLight)
         }
         let opacityBtn = modelFolder.add(props,'opacityButton').name('Opacity')
 
@@ -775,7 +773,6 @@
             scene.add(dirLight)
             scene.remove(ambientLight)
 
-            // const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
             const matcapTexture = new THREE.TextureLoader().load('./vaz/Meta_color.jpg')
             matModel.traverse(function(child) {
                 if(child.isMesh) {
@@ -910,6 +907,7 @@
 
         function animate() {
             requestAnimationFrame(animate)
+            // scene.rotation.y += -0.003
             renderer.render(scene, camera)
         }        
         animate()
