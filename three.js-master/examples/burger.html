@@ -115,18 +115,32 @@
 
         function setMterialColor(parent, mtl) {
             parent.traverse(function(child) {
-                    if(child.isMesh) {
-                        if(mtl.color.r == 1 && mtl.color.g == 1 && mtl.color.b == 1){
-                            child.remove(child.children[0])     // wireframe
-                        } else {
-                            let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
-                            let wireframeMaterial = new THREE.LineBasicMaterial({color:mtl.color})
-                            let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
-                            child.add(wireframe)
+                if(child.isMesh) {
+                    if(mtl.color.r == 1 && mtl.color.g == 1 && mtl.color.b == 1){
+                        child.remove(child.children[0])     // wireframe
+                    } else {
+                        let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
+                        let wireframeMaterial = new THREE.LineBasicMaterial({color:mtl.color})
+                        let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
+                        child.add(wireframe)
                     }
                 }
             })
         }
+
+        // let basicArray = []
+        // theModel.traverse(function(child) {
+        //     if(child.isMesh) {
+        //         basicArray.push(child)
+        //     }
+        // })
+        // basicArray.push(scene.children[0])
+
+        // console.log(theModel.children[0].children[0].children[0].children[0].children)
+        // let mesh = theModel.children[0].children[0].children[0].children[0].children
+        // basicArray.push(mesh)
+        
+        // let basicSize = basicArray.length
         
         let props = {}
         const renderFolder = gui.addFolder("RENDER")
