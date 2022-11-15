@@ -50,8 +50,8 @@
         const controls = new OrbitControls(camera, renderer.domElement)
         function setCamera() {
             // camera.position.set(10,5,17)
-            camera.position.set(3.663249037871437,3.2943829468143138,6.876483057858351)
-            camera.rotation.set(-0.24904790882362943,0.5073814726612403,0.12295216578395465)
+            camera.position.set(3.663249037871437, 3.2943829468143138, 6.876483057858351)
+            camera.rotation.set(-0.24904790882362943, 0.5073814726612403, 0.12295216578395465)
             controls.enableDamping = true
             // controls.minDistance = 1
             // controls.maxDistance = 10
@@ -100,18 +100,6 @@
         const background_color = 0xf1f1f1
         scene.background = new THREE.Color(background_color)
         scene.fog = new THREE.Fog(background_color,20,100)
-
-        // Floor
-        // let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
-        // let floorMaterial = new THREE.MeshPhongMaterial({
-        //     color: 0xeeeeee,
-        //     shininess:0
-        // })
-        // let floor = new THREE.Mesh(floorGeometry, floorMaterial)
-        // floor.rotation.x = -0.5*Math.PI
-        // floor.receiveShadow = true
-        // floor.position.y = -1
-        // scene.add(floor)
 
         const colors = [ {color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'} ]
 
@@ -565,6 +553,7 @@
             baseMaterial()
             scene.remove(hemiLight)
             scene.remove(dirLight)
+            scene.remove(pointLight)
             scene.remove(ambientLight)
             scene.traverse(function(child){
                 if(child.isLine) {
@@ -603,12 +592,13 @@
                 scene.add(matModel)
                 scene.name = 'mat'
             }
-            scene.add(pointLight)
+            scene.remove(pointLight)
             scene.add(hemiLight)
             scene.add(dirLight)
             scene.remove(ambientLight)
 
-            const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
+            // const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-gold.png')
+            const matcapTexture = new THREE.TextureLoader().load('./vaz/Meta_color.jpg')
             matModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.opacity = .2         // opacity
@@ -619,7 +609,7 @@
             })
             scene.traverse(function(child) {
                 if(child.isLine) {
-                    child.visible = false   
+                    child.visible = false
                 }
             })
         }
@@ -697,7 +687,7 @@
                 scene.add(gridModel)
                 scene.name = 'grid'
             }
-            scene.add(pointLight)
+            scene.remove(pointLight)
             const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
             gridModel.traverse(function(child) {
                 if(child.isMesh) {

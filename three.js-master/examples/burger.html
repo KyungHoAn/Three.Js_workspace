@@ -308,7 +308,7 @@
                     child.visible = false
                 }
             })
-            const matcapTexture = new THREE.TextureLoader().load('./burger/matcap-gold.png')
+            const matcapTexture = new THREE.TextureLoader().load('./vaz/matcap-g.png')
             goldModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.map = matcapTexture

@@ -237,6 +237,18 @@
         }
         let anisotropyBtn = materialFolder.add(props,'anisotropyButton').name('Anisotropy')
 
+        // Roughness
+        props.roughnessButton = function() {
+            scene.remove(floor)
+            backMaterial()
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    child.material.roughness = 1
+                }
+            })
+        }
+        let roughnessBtn = materialFolder.add(props,'roughnessButton').name('Roughness')
+
         // 거칠기
         props.normalMapButton = function() {
             scene.remove(floor)
@@ -300,6 +312,7 @@
                     child.visible = false
                 }
             })
+            
             const matcapTexture = new THREE.TextureLoader().load('./numbers/matcap-gold.png')
             goldModel.traverse(function(child) {
                 if(child.isMesh) {
