@@ -39,6 +39,8 @@
         const clock = new THREE.Clock()
         const gui = new GUI()
 
+        let grid
+
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
         renderer.setSize(window.innerWidth, window.innerHeight)
@@ -60,7 +62,12 @@
         setCamera()
         let loader = new GLTFLoader()
 
-        // const vaz = await loader.loadAsync('./vaz/vaz-2105.glb')
+        grid = new THREE.GridHelper(20, 40, 0x000000, 0x000000)
+        grid.material.opacity = 0.2
+        grid.material.depthWrite = false
+        grid.material.transparent = true
+        scene.add(grid)
+
         const vaz = await loader.loadAsync('./vaz/scene.gltf')
         const vaz2 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz3 = await loader.loadAsync('./vaz/scene.gltf')
@@ -745,12 +752,7 @@
             scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    // Specular
-                    if(child.material.name != 'glass1') {
-                        // let matcapMaterial = new THREE.MeshMatcapMaterial()
-                        // child.material = matcapMaterial
-                    }
-                    //
+                    child.material.specularIntensity = .01
                 }
             })
         }
@@ -817,8 +819,6 @@
                     child.material.metalness = 1        // metalness
                     child.material.roughness = 1        // roughness
 
-                    // if(child.children == '') {
-                    // }
                     let wireframeGeometry = new THREE.WireframeGeometry(child.geometry)
                     let wireframeMaterial = new THREE.LineBasicMaterial({color:0xffffff})
                     let wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
@@ -908,6 +908,17 @@
         function animate() {
             requestAnimationFrame(animate)
             // scene.rotation.y += -0.003
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    if(child.material.name == 'wheels'){
+                        child.rotation.x += 0.05
+                    }
+                }
+            })
+
+            const time = -performance.now() / 1000
+            grid.position.z = (time) %1
+            
             renderer.render(scene, camera)
         }        
         animate()
