@@ -78,8 +78,8 @@
         let wireModel = vaz5.scene
         let baseModel = vaz6.scene
         scene.add(theModel)
-        let helper
 
+        let helper
         theModel.traverse((o)=> {
             if(o.isMesh) {
                 o.castShadow = true
@@ -88,7 +88,7 @@
         })
 
         let ambientLight
-        ambientLight = new THREE.AmbientLight(0xffffff)
+        ambientLight = new THREE.AmbientLight(0xffffff, 0.95)
         scene.add(ambientLight)
 
         let hemiLight = new THREE.HemisphereLight(0xffffff,0xffffff,0.78)
@@ -107,11 +107,11 @@
         dirLight.shadow.mapSize = new THREE.Vector2(1024,1024)
         // scene.add(dirLight)
 
-        const background_color = 0xf1f1f1
+        const background_color = 0x928468
         scene.background = new THREE.Color(background_color)
         scene.fog = new THREE.Fog(background_color,20,100)
 
-        const colors = [ {color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'} ]
+        const colors = [{color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'}]
 
         function buildColors(colors) {
             for (let [i, color] of colors.entries()) {
@@ -137,7 +137,7 @@
             let new_mtl
             new_mtl = new THREE.MeshPhongMaterial({
                 color:parseInt('0x'+color.color),
-                shininess: color.shininess?color.shininess: 10
+                shininess: color.shininess ? color.shininess: 10
             })
             setMaterialColor(theModel,new_mtl)
         }
@@ -218,7 +218,7 @@
             
             if(camera.rotation.x == '-3.034487'){
                 gsap.to(camera.rotation, {
-                    duration: 0.5,
+                    duration: 0.2,
                     y: -0.0679885531988692,
                 })
             } else {
@@ -238,10 +238,9 @@
                 y: 1.8263274174864204,
                 z: 0.22265007992236185
             })
-        
             if(camera.rotation.x == '-3.057089' && camera.rotation.y == '-0.067989' && camera.rotation.z == '-3.135838') {
                 gsap.to(camera.rotation, {
-                    duration: 0.5,
+                    duration: 0.2,
                     y: 0.09798769704992441,
                 })
             } else {
@@ -250,7 +249,7 @@
                     x: -3.0344866460178874,
                     y: 0.09798769704992441,
                     z: 3.1310745046794355,
-                    delay: 0.8
+                    delay: 0.7
                 })
             }
         }
@@ -263,11 +262,11 @@
             })
             
             gsap.to(camera.rotation, {
-                duration: 0.5,
+                duration: 0.3,
                 x: 0.8048158948029703,
                 y: 0.5412204083012035,
                 z: -0.4917114459662305,
-                delay: 0.4
+                delay: 0.3
             })
         }
         function carDn2() {
@@ -371,9 +370,15 @@
 
         theModel.traverse(function(child) {
             if(child.isMesh) {
-                // child.material.opacity = .8        // opactiy
-                child.material.metalness = .85        // metalness
-                // child.material.roughness = .8        // roughness
+                if(child.material.name == 'headlight1' || child.material.name == 'headlight2') {
+                    child.material.opacity = .7         // opactiy
+                    child.material.metalness = .75      // metalness
+                    // child.material.roughness = .8    // roughness
+                }
+                if(child.material.name == 'signs') {
+                    child.material.metalness = .6
+                    child.material.specularIntensity = 1
+                }
             }
         })
 
@@ -382,6 +387,18 @@
             sceneReset()
             baseMaterial()
             scene.add(pointLight)
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    if(child.material.name == 'headlight1' || child.material.name == 'headlight2') {
+                        child.material.opacity = .7         // opactiy
+                        child.material.metalness = .75      // metalness
+                    }
+                    if(child.material.name == 'signs') {
+                        child.material.metalness = .6
+                        child.material.specularIntensity = 1
+                    }
+                }
+            })
         }
         let final = renderFolder.add(props, 'finalButton').name('Final Render')
         
@@ -389,7 +406,7 @@
         // 기본 color
         props.baseButton = function() {
             baseMaterial()
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == ''){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == '') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
@@ -401,7 +418,6 @@
             scene.add(hemiLight)
             scene.add(dirLight)
             scene.remove(ambientLight)
-            
             scene.add(pointLight)
 
             baseModel.traverse(function(child) {
@@ -566,7 +582,7 @@
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
-        // 금속성
+        // 금속성 metalness
         props.metalnessButton = function() {
             sceneReset()
             theModel.traverse(function(child) {
@@ -585,7 +601,7 @@
         }
         let metalnessBtn = modelFolder.add(props,'metalnessButton').name('Metalness')
 
-        // 거칠기
+        // 거칠기 roughness
         props.roughnessButton = function() {
             sceneReset()
             scene.add(pointLight)
@@ -604,7 +620,7 @@
         }
         let roughnessBtn = modelFolder.add(props,'roughnessButton').name('Roughness')
 
-        // 노멀 맵
+        // 노멀 맵 Normal Map
         props.normalButton = function() {
             sceneReset()
             if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire' || scene.name == 'base') {
@@ -709,7 +725,7 @@
         }
         let normalBtn = modelFolder.add(props,'normalButton').name('Normal Map')
 
-        // 불투명
+        // 불투명 opacity
         props.opacityButton = function() {
             sceneReset()
             theModel.traverse(function(child) {
@@ -728,7 +744,7 @@
         }
         let opacityBtn = modelFolder.add(props,'opacityButton').name('Opacity')
 
-        // 빛 x
+        // 빛 x Emission 
         props.emissionButton = function() {
             if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base') {
                 scene.remove(matModel)
@@ -879,7 +895,6 @@
                     child.material.map = gridTexture
                 }
             })
-
         }
         let uvBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
 
@@ -918,14 +933,12 @@
             theModel.traverse(function(child) {
                 if(child.isMesh) {
                     if(child.material.name == 'wheels'){
-                        child.rotation.x += 0.05
+                        child.rotation.x += .05
                     }
                 }
             })
-
             const time = -performance.now() / 1000
-            grid.position.z = (time) %1
-            
+            grid.position.z = (time) % 1
             renderer.render(scene, camera)
         }        
         animate()
