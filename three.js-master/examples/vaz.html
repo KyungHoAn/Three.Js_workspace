@@ -34,12 +34,9 @@
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
         const TRAY = document.getElementById('js-tray-slide')
-
         const canvas = document.querySelector('#c')
         const clock = new THREE.Clock()
         const gui = new GUI()
-
-        let grid
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
@@ -59,6 +56,7 @@
         setCamera()
         let loader = new GLTFLoader()
 
+        let grid
         grid = new THREE.GridHelper(20, 40, 0x000000, 0x000000)
         grid.material.opacity = 0.2
         grid.material.depthWrite = false
@@ -112,7 +110,6 @@
         scene.fog = new THREE.Fog(background_color,20,100)
 
         const colors = [{color:'66533C'}, {color:'173A2F'}, {color:'153944'}, {color:'27548D'}, {color:'438AAC'}]
-
         function buildColors(colors) {
             for (let [i, color] of colors.entries()) {
                 let swatch = document.createElement('div')
@@ -131,7 +128,7 @@
         }
 
         let carBody = theModel.children[0].children[0].children[0].children[1].children[0].material.color
-
+        // VAR 외부 color change event
         function selectSwatch(e) {
             let color = colors[parseInt(e.target.dataset.key)]
             let new_mtl
@@ -141,7 +138,6 @@
             })
             setMaterialColor(theModel,new_mtl)
         }
-
         function setMaterialColor(parent, mtl) {
             carBody.r = mtl.color.r
             carBody.g = mtl.color.g
@@ -208,6 +204,7 @@
                 }
             }
         )
+        // click & Camera move event
         function firstLocation() {
             gsap.to(camera.position,{
                 duration: 1,
@@ -286,6 +283,7 @@
             })
         }
 
+        // VAR 외부 wireframe color change event
         const colorFolder = gui.addFolder('WIREFRAME')
         props.returnButton = function() {
             scene.traverse(function(child){
@@ -382,6 +380,7 @@
             }
         })
 
+        // final VAR Model
         const renderFolder = gui.addFolder('RENDER')
         props.finalButton = function() {
             sceneReset()
@@ -403,7 +402,7 @@
         let final = renderFolder.add(props, 'finalButton').name('Final Render')
         
         const modelFolder = gui.addFolder("Model Inspector")
-        // 기본 color
+        // Basic color
         props.baseButton = function() {
             baseMaterial()
             if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == '') {
@@ -582,14 +581,28 @@
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
+
         // 금속성 metalness
         props.metalnessButton = function() {
             sceneReset()
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.material.opacity = .2         // opacity
-                    child.material.metalness = 10       // metalness
-                    child.material.roughness = .5        // roughness
+                    // console.log(child.material.metalness)
+                    // if(child.material.metalness == 1) {
+                    //     console.log(child.material.name)
+                    //     console.log(child.material.color)
+                    // }
+                    if(child.material.name == 'carcass') {
+                        console.log(child.material)
+                    }
+                    // child.material.opacity = .2         // opacity
+                    // child.material.metalness = 10       // metalness
+                    // child.material.roughness = .5        // roughness
+                    // if(child.material.name == 'carcass') {
+                    //     child.material.material = 10
+                    //     console.log(child.material.roughness)
+                    //     child.material.roughness = 10
+                    // }
                 }
             })
             scene.add(pointLight)
