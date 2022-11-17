@@ -69,12 +69,14 @@
         const vaz4 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz5 = await loader.loadAsync('./vaz/scene.gltf')
         const vaz6 = await loader.loadAsync('./vaz/scene.gltf')
+        const vaz7 = await loader.loadAsync('./vaz/scene.gltf')
         let theModel = vaz.scene
         let matModel = vaz2.scene
         let gridModel = vaz3.scene
         let normalModel = vaz4.scene
         let wireModel = vaz5.scene
         let baseModel = vaz6.scene
+        let metaModel = vaz7.scene
         scene.add(theModel)
 
         let helper
@@ -104,6 +106,11 @@
         dirLight.castShadow = true
         dirLight.shadow.mapSize = new THREE.Vector2(1024,1024)
         // scene.add(dirLight)
+
+        let spotLight = new THREE.SpotLight(0xffffff, 0.15)
+        scene.add(spotLight)
+        spotLight.position.set(-7,10,3)
+
 
         const background_color = 0x928468
         scene.background = new THREE.Color(background_color)
@@ -388,13 +395,16 @@
             scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    if(child.material.name == 'headlight1' || child.material.name == 'headlight2') {
+                    if(child.material.name == 'headlight1') {
                         child.material.opacity = .7         // opactiy
                         child.material.metalness = .75      // metalness
                     }
                     if(child.material.name == 'signs') {
                         child.material.metalness = .6
                         child.material.specularIntensity = 1
+                    }
+                    if(child.material.name == 'lights') {
+                        child.material.metalness = .9
                     }
                 }
             })
@@ -405,12 +415,13 @@
         // Basic color
         props.baseButton = function() {
             baseMaterial()
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == '') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == '' || scene.name == 'meta') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
                 scene.remove(wireModel)
                 scene.remove(theModel)
+                scene.remove(metaModel)
                 scene.add(baseModel)
                 scene.name = 'base'
             }
@@ -581,28 +592,49 @@
         }
         let baseBtn = modelFolder.add(props, 'baseButton').name('Base Color')
 
-
         // 금속성 metalness
         props.metalnessButton = function() {
-            sceneReset()
-            theModel.traverse(function(child) {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == ''){
+                scene.remove(matModel)
+                scene.remove(gridModel)
+                scene.remove(normalModel)
+                scene.remove(wireModel)
+                scene.remove(baseModel)
+                scene.remove(theModel)
+                scene.add(metaModel)
+                scene.name = 'meta'
+            }
+            scene.add(hemiLight)
+            scene.add(dirLight)
+            scene.remove(ambientLight)
+
+            metaModel.traverse(function(child) {
                 if(child.isMesh) {
-                    // console.log(child.material.metalness)
-                    // if(child.material.metalness == 1) {
-                    //     console.log(child.material.name)
-                    //     console.log(child.material.color)
-                    // }
-                    if(child.material.name == 'carcass') {
-                        console.log(child.material)
+                    child.material.opacity = .2                 // opacity
+                    child.material.roughness = .5               // roughness
+
+                    if(child.material.name == 'lights') {       // headlight
+                        child.material.metalness = .5
                     }
-                    // child.material.opacity = .2         // opacity
-                    // child.material.metalness = 10       // metalness
-                    // child.material.roughness = .5        // roughness
-                    // if(child.material.name == 'carcass') {
-                    //     child.material.material = 10
-                    //     console.log(child.material.roughness)
-                    //     child.material.roughness = 10
-                    // }
+                    if(child.material.name == 'carcass') {      // car body
+                        child.material.color.set(1,1,1)
+                        child.material.opacity = 1
+                        child.material.metalness = 0              
+                    }
+                    if(child.material.name == 'stuff') {        // headlight 점
+                        child.material.color.set(1,1,1)
+                    }
+                    if(child.material.name == 'seals') {        // A 필터
+                    }
+                    if(child.material.name == 'plastic1') {     // 얼룩
+                        child.material.opacity = 10
+                    }
+                    if(child.material.name == 'signs') {        // logo
+                        child.material.color.set(255,255,255)
+                        child.material.color.r = 255
+                        child.material.color.g = 255
+                        child.material.color.b = 255
+                    }
                 }
             })
             scene.add(pointLight)
@@ -620,9 +652,9 @@
             scene.add(pointLight)
             theModel.traverse(function(child) {
                 if(child.isMesh) {
-                    child.material.opacity = .2         // opacity
+                    child.material.opacity = .2          // opacity
                     child.material.metalness = .5        // metalness
-                    child.material.roughness = 10       // roughness
+                    child.material.roughness = 10        // roughness
                 }
             })
             scene.traverse(function(child){
@@ -636,12 +668,13 @@
         // 노멀 맵 Normal Map
         props.normalButton = function() {
             sceneReset()
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire' || scene.name == 'base') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == '' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(theModel)
                 scene.remove(wireModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(normalModel)
                 scene.name = 'normal'
             }
@@ -759,12 +792,13 @@
 
         // 빛 x Emission 
         props.emissionButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
                 scene.remove(wireModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(theModel)
                 scene.name = ''
             }
@@ -798,12 +832,13 @@
         const geometryFolder = gui.addFolder("geometry")
         // matcap
         props.matcapButton = function() {
-            if(scene.name == '' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base'){
+            if(scene.name == '' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta'){
                 scene.remove(theModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
                 scene.remove(wireModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(matModel)
                 scene.name = 'mat'
             }
@@ -831,12 +866,13 @@
 
         // wireframe
         props.wireframeButton = function() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == '' || scene.name == 'base') {
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == '' || scene.name == 'base' || scene.name == 'meta') {
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
                 scene.remove(theModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(wireModel)
                 scene.name = 'wire'
             }
@@ -887,7 +923,7 @@
         const uvFolder = gui.addFolder('UV')
         props.uvButton = function() {
             baseMaterial()
-            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base'){
+            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta'){
                 scene.traverse(function(child){
                     if(child.isLine) {
                         child.visible = false
@@ -898,6 +934,7 @@
                 scene.remove(normalModel)
                 scene.remove(wireModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(gridModel)
                 scene.name = 'grid'
             }
@@ -927,12 +964,13 @@
         }
         
         function sceneReset() {
-            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base'){
+            if(scene.name == 'mat' || scene.name == 'grid' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta'){
                 scene.remove(matModel)
                 scene.remove(gridModel)
                 scene.remove(normalModel)
                 scene.remove(wireModel)
                 scene.remove(baseModel)
+                scene.remove(metaModel)
                 scene.add(theModel)
                 scene.name = ''
             }

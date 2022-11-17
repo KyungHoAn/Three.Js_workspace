@@ -60,7 +60,18 @@
         grid.material.opacity = 0.2
         grid.material.depthWrite = false
         grid.material.transparent = true
-        scene.add(grid)
+        // scene.add(grid)
+
+        // Floor
+        let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
+        let floorMaterial = new THREE.MeshPhongMaterial({
+            color: 0x000000
+        })
+        let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+        floor.rotation.x = -2.5 * Math.PI
+        floor.receiveShadow = true
+        floor.position.y = -1
+        scene.add(floor)
 
         const bmw = await loader.loadAsync('./bmw/scene.gltf')
         let bmwModel = bmw.scene
@@ -95,7 +106,7 @@
         bmwModel.traverse((child) => {
             if(child.isMesh){
                 console.log(child.material.name)
-                if(child.material.name == 'Carbon'){    // 카본재질 -> 검은색
+                if(child.material.name == 'Carbon'){        // 카본재질 -> 검은색
                     child.material.metalness = 0
                     child.material.roughness = 0.6
                 }
@@ -106,10 +117,10 @@
                     child.material.color.r = 128
                 }
                 if(child.material.name == 'Glass'){
-                    child.material.opacity = 0.25    //0.8
+                    child.material.opacity = 0.25           //0.8
                     child.material.metalness = 0.25
                 }
-                if(child.material.name == 'Metal') {    // wheels 외부
+                if(child.material.name == 'Metal') {        // wheels 외부
                     child.material.metalness = 1
                     child.material.color.b = 128
                     child.material.color.g = 128
@@ -117,32 +128,36 @@
                 }
                 if(child.material.name == 'material') {     // 후방 라이트
                 }
-                if(child.material.name == 'Paint') {    // body
-                    child.material.metalness = 1       // 0.5
-                    child.material.roughness = .5       // 0
+                if(child.material.name == 'Paint') {        // body
+                    child.material.metalness = 1            // 0.5
+                    child.material.roughness = .5           // 0
                 }
                 if(child.material.name == 'Badges'){
                     child.material.color.r = 1
                     child.material.color.g = 1
                     child.material.color.b = 1
                 }
-                if(child.material.name == 'Leather') {  // 내부
+                if(child.material.name == 'Leather') {       // 내부
                 }
-                if(child.material.name == 'Rubber') {   // 고무 바퀴
+                if(child.material.name == 'Rubber') {        // 고무 바퀴
                 }
-                if(child.material.name == 'WhiteLights') {  // ?
+                if(child.material.name == 'WhiteLights') {   // ?
                 }
-                if(child.material.name == 'Plastic') {  // 전방 라이트 금속
+                if(child.material.name == 'Plastic') {       // 전방 라이트 금속
                     spotLight = new THREE.SpotLight(0xffffff,10)
                     let spotLightHelper = new THREE.SpotLightHelper(spotLight)
                     scene.add(spotLightHelper)
                     spotLight.position.set(6,7,20)
+                    spotLight.rotation.x = -1
+                    spotLight.distance = 100
+                    spotLight.intensity = 100
                     console.log(spotLight)
+                    spotLight.angle = 0.5
                     scene.add(spotLight)
                 }
             }
         })
-
+        
         function animate() {
             requestAnimationFrame(animate)
             bmwModel.traverse(function(child) {
