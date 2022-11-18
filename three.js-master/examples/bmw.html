@@ -60,7 +60,7 @@
         grid.material.opacity = 0.2
         grid.material.depthWrite = false
         grid.material.transparent = true
-        // scene.add(grid)
+        scene.add(grid)
 
         // Floor
         let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
@@ -105,7 +105,6 @@
 
         bmwModel.traverse((child) => {
             if(child.isMesh){
-                console.log(child.material.name)
                 if(child.material.name == 'Carbon'){        // 카본재질 -> 검은색
                     child.material.metalness = 0
                     child.material.roughness = 0.6
@@ -151,7 +150,6 @@
                     spotLight.rotation.x = -1
                     spotLight.distance = 100
                     spotLight.intensity = 100
-                    console.log(spotLight)
                     spotLight.angle = 0.5
                     scene.add(spotLight)
                 }
