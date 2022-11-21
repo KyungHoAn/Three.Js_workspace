@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="./vaz.css">
+    <title>Three.js - Fundamentals with light</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+  </head>
+<body>
+    <script type="importmap">
+        {
+            "imports" : {
+                "three" : "../build/three.module.js",
+                "OrbitControls" : "./jsm/controls/OrbitControls.js",
+                "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                "OBJLoader" :"./jsm/loaders/OBJLoader.js",
+                "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
+                "GUI":"./jsm/libs/lil-gui.module.min.js",
+                "MTLLoader":"./jsm/loaders/MTLLoader.js",
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three'
+        import { OrbitControls } from 'OrbitControls'
+        import { GUI } from 'GUI'
+        import { OBJLoader } from 'OBJLoader'
+        import { MTLLoader } from 'MTLLoader'
+        import { GLTFLoader } from 'GLTFLoader'
+        import { VertexNormalsHelper } from 'VertexNormalsHelper'
+
+        // Question Reference: https://discourse.threejs.org/t/change-spotlight-position/19158
+
+        let camera, scene, renderer, mesh;
+
+        function createWorld() {
+        // Create road
+        const road = new THREE.Mesh(
+            new THREE.PlaneBufferGeometry(5, 50),
+            new THREE.MeshStandardMaterial({ color: 0x999999 })
+        );
+        road.rotation.x -= Math.PI / 2;
+        road.position.y -= 1.1;
+        
+        scene.add(road);
+        
+        // Create car (box)
+
+        const controls = new OrbitControls(camera, renderer.domElement)
+        function setCamera() {
+            camera.position.set(30,35,60)
+            controls.enableDamping = true
+            controls.update()
+        }
+        setCamera()
+        
+        const car = new THREE.Mesh(
+            new THREE.BoxBufferGeometry(2, 2, 2),
+            new THREE.MeshStandardMaterial({ color: 0xeeeeee })
+        );
+        
+        scene.add(car);
+        
+        camera.lookAt(car.position);
+
+        // Add lights to the car
+        const headlights = new THREE.SpotLight(0xffffcc, 1);
+        headlights.position.set(0, 0, 1);
+        headlights.target.position.set(0, 0, 2);
+
+        car.add(headlights);
+        car.add(headlights.target); // See docs https://threejs.org/docs/#api/en/lights/SpotLight.target
+
+        const headHelper = new THREE.SpotLightHelper(headlights)
+        car.add(headHelper)
+        
+        mesh = car;
+        }
+
+        function init() {
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000.0);
+        camera.position.set(-5, 5, 7);
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x333333);
+
+        scene.add(new THREE.HemisphereLight(0xffffcc, 0x19bbdc, 1));
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
+        
+        createWorld();
+        }
+
+        function animate() {
+        requestAnimationFrame(animate);
+
+        renderer.render(scene, camera);
+
+        // mesh.rotation.y += THREE.MathUtils.degToRad(Math.random() * 2 - 1);
+        // mesh.rotation.z += THREE.MathUtils.degToRad(Math.random() * 1 - .5);
+        }
+
+        init();
+        animate();        
+    </script>
+</body>
+</html>

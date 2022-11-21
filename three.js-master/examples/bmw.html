@@ -105,6 +105,9 @@
 
         bmwModel.traverse((child) => {
             if(child.isMesh){
+                console.log(child.material.name)
+                child.castShadow = true
+                child.receiveShadow = true
                 if(child.material.name == 'Carbon'){        // 카본재질 -> 검은색
                     child.material.metalness = 0
                     child.material.roughness = 0.6
@@ -142,42 +145,36 @@
                 }
                 if(child.material.name == 'WhiteLights') {   // ?
                 }
-                if(child.material.name == 'Plastic') {       // 전방 라이트 금속
-                    spotLight = new THREE.SpotLight(0xff0000,10)
-                    let spotLightHelper = new THREE.SpotLightHelper(spotLight)
-                    scene.add(spotLightHelper)
-
-                    spotLight.castShadow = true
-                    spotLight.shadow.mapSize.width = 512
-                    spotLight.shadow.mapSize.height = 512
-                    spotLight.shadow.camera.near = 0.5
-                    spotLight.shadow.camera.far = 500
-                    spotLight.shadow.focus = 1
-                    
-                    spotLight.position.set(6,7,20)
-                    spotLight.rotation.x = -1
-                    scene.add(spotLight.target)
-
-                    spotLight.target.position.z = 120
-                    spotLight.distance = 100
-                    spotLight.intensity = 100
-                    spotLight.angle = 0.5
-                    scene.add(spotLight)
-                    console.log(spotLight)
+                if(child.material.name == 'Plastic') {       // 전방 라이트 금속s
+                }
+                if(child.material.name == 'Glass') {
                 }
             }
         })
         
+        const headlight = new THREE.SpotLight(0xffffcc, 10)
+        headlight.position.set(6,7,21)
+        headlight.target.position.set(0,0,10)
+        bmwModel.add(headlight)
+        bmwModel.add(headlight.target)
+        console.log(headlight)
+        
+        const headlight1 = new THREE.SpotLight(0xffffcc, 10)
+        headlight1.position.set(-7,7,21)
+        headlight1.target.position.set(0,0,120)
+        bmwModel.add(headlight1)
+        bmwModel.add(headlight1.target)
+        
         function animate() {
-            requestAnimationFrame(animate)
+            requestAnimationFrame(animate)  
             bmwModel.traverse(function(child) {
                 if(child.isMesh) {
                     if(child.material.name == 'Rubber') {
                     }
                 }
             })
-            const time = -performance.now() / 300
-            grid.position.z = (time) % 5
+            // const time = -performance.now() / 300
+            // grid.position.z = (time) % 5
             renderer.render(scene, camera)
         }        
         animate()
