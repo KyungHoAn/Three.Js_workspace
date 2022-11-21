@@ -18,7 +18,8 @@
                 "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
                 "GUI":"./jsm/libs/lil-gui.module.min.js",
                 "MTLLoader":"./jsm/loaders/MTLLoader.js",
-                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js",
+                "Lensflare":"./jsm/objects/Lensflare.js"
             }
         }
     </script>
@@ -30,6 +31,7 @@
         import { MTLLoader } from 'MTLLoader'
         import { GLTFLoader } from 'GLTFLoader'
         import { VertexNormalsHelper } from 'VertexNormalsHelper'
+        import {Lensflare,LensflareElement} from 'Lensflare'
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -77,27 +79,28 @@
         let bmwModel = bmw.scene
         scene.add(bmwModel)
 
-        let dirLight = new THREE.DirectionalLight(0xffffff, 1.5)        // 상단
-        scene.add(dirLight)
+        // let dirLight = new THREE.DirectionalLight(0xffffff, 1.5)        // 상단
+        // scene.add(dirLight)
 
-        let dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5)    // 왼쪽
-        dirLight1.position.x =-10
-        scene.add(dirLight1)
+        // let dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5)    // 왼쪽
+        // dirLight1.position.x =-10
+        // scene.add(dirLight1)
 
-        let dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5)    // 오른쪽
-        dirLight2.position.x =10
-        scene.add(dirLight2)
+        // let dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5)    // 오른쪽
+        // dirLight2.position.x =10
+        // scene.add(dirLight2)
 
-        let dirLight3 = new THREE.DirectionalLight(0xffffff, 1.5)       // 후방
-        dirLight3.position.z =-25
-        dirLight3.position.y =15
-        scene.add(dirLight3)
+        // let dirLight3 = new THREE.DirectionalLight(0xffffff, 1.5)       // 후방
+        // dirLight3.position.z =-25
+        // dirLight3.position.y =15
+        // scene.add(dirLight3)
 
-        let dirLight4 = new THREE.DirectionalLight(0xffffff, 1.5)       // 전방
-        dirLight4.position.z = 25
-        dirLight4.position.y = 15
-        scene.add(dirLight4)
+        // let dirLight4 = new THREE.DirectionalLight(0xffffff, 1.5)       // 전방
+        // dirLight4.position.z = 25
+        // dirLight4.position.y = 15
+        // scene.add(dirLight4)
 
+        let textureFlare0
         let spotLight
 
         const background_color = 0x333333
@@ -107,18 +110,19 @@
             if(child.isMesh){
                 child.castShadow = true
                 child.receiveShadow = true
-                if(child.material.name == 'Carbon'){        // 카본재질 -> 검은색
+                console.log(child.material.name)
+                if(child.material.name == 'Carbon') {        // 카본재질 -> 검은색
                     child.material.metalness = 0
                     child.material.roughness = 0.6
                 }
-                if(child.material.name == 'MetalScratched'){    // wheels 내부
+                if(child.material.name == 'MetalScratched') {    // wheels 내부
                     child.material.metalness = 1
                     child.material.color.b = 128
                     child.material.color.g = 128
                     child.material.color.r = 128
                 }
-                if(child.material.name == 'Glass'){
-                    child.material.opacity = 0.25           //0.8
+                if(child.material.name == 'Glass') {
+                    child.material.opacity = 0.25           // 0.8
                     child.material.metalness = 0.25
                 }
                 if(child.material.name == 'Metal') {        // wheels 외부
@@ -133,7 +137,7 @@
                     child.material.metalness = 1            // 0.5
                     child.material.roughness = .5           // 0
                 }
-                if(child.material.name == 'Badges'){
+                if(child.material.name == 'Badges') {        // Badges
                     child.material.color.r = 1
                     child.material.color.g = 1
                     child.material.color.b = 1
@@ -142,14 +146,42 @@
                 }
                 if(child.material.name == 'Rubber') {        // 고무 바퀴
                 }
-                if(child.material.name == 'WhiteLights') {   // ?
+                if(child.material.name == 'WhiteLights') {   // 전방 라이트 white
+                    console.log(child)
+
                 }
                 if(child.material.name == 'Plastic') {       // 전방 라이트 금속s
-                }
-                if(child.material.name == 'Glass') {
+
+                    const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.05)
+                    dirLight2.position.set(0,-1, 0).normalize()
+                    dirLight2.color.setHSL(0.1, 0.7, 0.5)
+                    scene.add(dirLight2)
+                    
+                    const textureLoader = new THREE.TextureLoader()
+                    textureFlare0 = textureLoader.load('./vaz/lensflare0.png')
+                    addLight(0.08, 0.8, 0.5, 0,0,-1000)
                 }
             }
         })
+
+        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.05)
+        dirLight2.position.set(0,-1, 0).normalize()
+        dirLight2.color.setHSL(0.1, 0.7, 0.5)
+        scene.add(dirLight2)
+        
+        const textureLoader = new THREE.TextureLoader()
+        textureFlare0 = textureLoader.load('./vaz/lensflare0.png')
+        addLight(0.08, 0.8, 0.5, 0,0,-1000)
+
+        function addLight(h,s,l,x,y,z) {
+            const light2 = new THREE.PointLight(0xffffff, 1.5, 2000)
+            light2.color.setHSL(h,s,l)
+            light2.position.set(x,y,z)
+            scene.add(light2)
+            const lensflare = new Lensflare()
+            lensflare.addElement(new LensflareElement(textureFlare0, 700, 0, light2.color))
+            light2.add(lensflare)
+        }
 
         var headlight1 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
         headlight1.castShadow = true
@@ -169,7 +201,8 @@
             requestAnimationFrame(animate)
             bmwModel.traverse(function(child) {
                 if(child.isMesh) {
-                    if(child.material.name == 'Rubber') {
+                    if(child.material.name == 'Metal') {
+                        // child.rotation.x += .05
                     }
                 }
             })
