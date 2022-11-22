@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="stylesheet" href="./vaz.css">
+    <title>Three.js - Fundamentals with light</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+  </head>
+<body>
+    <script type="importmap">
+        {
+            "imports" : {
+                "three" : "../build/three.module.js",
+                "OrbitControls" : "./jsm/controls/OrbitControls.js",
+                "three/examples/jsm/libs/stats.module": "../examples/jsm/libs/stats.module.js",
+                "OBJLoader" :"./jsm/loaders/OBJLoader.js",
+                "GLTFLoader":"./jsm/loaders/GLTFLoader.js",
+                "GUI":"./jsm/libs/lil-gui.module.min.js",
+                "MTLLoader":"./jsm/loaders/MTLLoader.js",
+                "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js"
+            }
+        }
+    </script>
+    <script type="module">
+    import * as THREE from 'three'
+    import { OrbitControls } from 'OrbitControls'
+    import { GUI } from 'GUI'
+    import { OBJLoader } from 'OBJLoader'
+    import { MTLLoader } from 'MTLLoader'
+    import { GLTFLoader } from 'GLTFLoader'
+    import { VertexNormalsHelper } from 'VertexNormalsHelper'
+
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
+    const TRAY = document.getElementById('js-tray-slide')
+    const canvas = document.querySelector('#c')
+    const clock = new THREE.Clock()
+    const gui = new GUI()
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+    let autoE = false
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.shadowMap.enabled = true
+    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    document.body.appendChild(renderer.domElement)
+
+    const controls = new OrbitControls(camera, renderer.domElement)
+    camera.position.set(3.663249037871437, 3.2943829468143138, 6.876483057858351)
+    camera.rotation.set(-0.24904790882362943, 0.5073814726612403, 0.12295216578395465)
+    controls.enableDamping = true
+    controls.update()
+
+    const background_color = 0x928468
+    scene.background = new THREE.Color(background_color)
+    scene.fog = new THREE.Fog(background_color,20,100)
+
+    let ambientLight
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.95)
+    scene.add(ambientLight)
+
+    let props = {}
+    let loader = new GLTFLoader()
+    loader.load('./vaz/scene.gltf',(gltf) => {
+        let theModel = gltf.scene
+        scene.add(theModel)
+
+        // Final VAR Model
+        const renderFolder = gui.addFolder('RENDER')
+        props.finalButton = function() {
+            scene.set(theModel)
+        }
+        let final = renderFolder.add(props, 'finalButton').name('Final Render')
+
+        // UV Checker
+        const uvFolder = gui.addFolder('UV')
+        props.uvButton = function() {
+            const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
+            theModel.traverse((child) => {
+                if(child.isMesh) {
+                    child.material.map = gridTexture
+                }
+            })
+        }
+        let ubBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
+    })
+
+
+
+
+    function animate() {
+        requestAnimationFrame(animate)
+        renderer.render(scene, camera)
+    }
+    animate()
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+        renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+    window.addEventListener('resize', onWindowResize)
+
+    </script>
+    <canvas id="c"></canvas>
+    <div class="controls">
+        <div id="js-tray" class="tray">
+            <div id="js-tray-slide" class="tray__slide"></div>
+        </div>
+    </div>
+</body>
+</html>

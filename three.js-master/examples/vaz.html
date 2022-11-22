@@ -61,6 +61,7 @@
         setCamera()
         let loader = new GLTFLoader()
 
+        let helper
         let grid
         grid = new THREE.GridHelper(20, 40, 0x000000, 0x000000)
         grid.material.opacity = 0.2
@@ -82,29 +83,66 @@
         let wireModel = vaz5.scene
         let baseModel = vaz6.scene
         let metaModel = vaz7.scene
-        scene.add(theModel)
-
-
+        scene.add(theModel)   
         
-
+        
+        
+        // window.onload = function() {
+            
+        // }
         let materialArr = new Array()
         let meshSize = theModel.children[0].children[0].children[0].children.length
         let material = theModel.children[0].children[0].children[0].children
         for(let i=0; i<meshSize; i++) {
-            if(theModel.children[0].children[0].children[0].children[i].children[0].isMesh){
+            if(theModel.children[0].children[0].children[0].children[i].children[0].isMesh) {
                 materialArr[i] = theModel.children[0].children[0].children[0].children[i].children[0]
             }
         }
         // console.log(materialArr)
         // console.log(material)
+        
 
 
-
-        let helper
-        theModel.traverse((o)=> {
-            if(o.isMesh) {
-                o.castShadow = true
-                o.receiveShadow = true
+        theModel.traverse(function(child) {
+            if(child.isMesh) {
+                child.castShadow = true
+                child.receiveShadow = true
+                
+                if(child.material.name == 'headlight1') {
+                    child.material.opacity = .7                 // opactiy
+                    child.material.metalness = .75              // metalness
+                }
+                if(child.material.name == 'headlight2') {
+                }
+                if(child.material.name == 'signs') {
+                    child.material.metalness = .6
+                    child.material.specularIntensity = 1
+                }
+                if(child.material.name == 'lights') {
+                    child.material.metalness = .88
+                }
+                // if(child.material.name == 'seals') {         // headlight 와이퍼 Object_294 296 298 300 302
+                //     if(child.name == 'Object_294') {
+                //     }
+                // }
+                // if(child.material.name == 'salon5'){         // 핸들
+                //     console.log(child.material.color)
+                // }
+                if(child.material.name == 'plastic2') {         // 와이퍼
+                    // Object_196 198 200 202 204 206 208 210 212 214 216 218
+                    if(child.name == 'Object_196') {
+                    }
+                    if(child.name == 'Object_198') {
+                    }
+                    if(child.name == 'Object_200') {
+                    }
+                    if(child.name == 'Object_202') {
+                    }
+                    if(child.name == 'Object_204') {
+                    }
+                    if(child.name == 'Object_206') {
+                    }
+                }
             }
         })
 
@@ -132,7 +170,7 @@
         scene.add(spotLight)
         spotLight.position.set(-7,10,3)
 
-        const background_color = 0x928468
+        let background_color = 0x928468
         scene.background = new THREE.Color(background_color)
         scene.fog = new THREE.Fog(background_color,20,100)
 
@@ -393,54 +431,19 @@
         }
         let yellowBtn = colorFolder.add(props, 'yellowButton').name('Yellow Color')
 
-        let dirLight2
-
-        theModel.traverse(function(child) {
-            if(child.isMesh) {
-                if(child.material.name == 'headlight1') {
-                    child.material.opacity = .7                 // opactiy
-                    child.material.metalness = .75              // metalness
-                }
-                if(child.material.name == 'headlight2') {
-                }
-                if(child.material.name == 'signs') {
-                    child.material.metalness = .6
-                    child.material.specularIntensity = 1
-                }
-                if(child.material.name == 'lights') {
-                    child.material.metalness = .88
-                }
-                // if(child.material.name == 'seals') {         // headlight 와이퍼 Object_294 296 298 300 302
-                //     if(child.name == 'Object_294') {
-                //     }
-                // }
-                // if(child.material.name == 'salon5'){         // 핸들
-                //     console.log(child.material.color)
-                // }
-                if(child.material.name == 'plastic2') {         // 와이퍼
-                    // Object_196 198 200 202 204 206 208 210 212 214 216 218
-                    if(child.name == 'Object_196') {
-                    }
-                    if(child.name == 'Object_198') {
-                    }
-                    if(child.name == 'Object_200') {
-                    }
-                    if(child.name == 'Object_202') {
-                    }
-                    if(child.name == 'Object_204') {
-                    }
-                    if(child.name == 'Object_206') {
-                    }
-                }
-            }
-        })
-
         // final VAR Model
         const renderFolder = gui.addFolder('RENDER')
         props.finalButton = function() {
-            
+            // console.log(theModel.children[0].children[0].children[0].children)
+            // for(let a = 0; a < meshSize; a++ ) {
+            //     if(theModel.children[0].children[0].children[0].children[a].children[0].isMesh) {
+            //         theModel.children[0].children[0].children[0].children[a].children[0] = materialArr[a]
+            //         console.log(theModel.children[0].children[0].children[0].children[a].children[0])
 
-            // sceneReset()
+            //     }
+            // }
+
+            sceneReset()
             baseMaterial()
             scene.add(pointLight)
             theModel.traverse(function(child) {
@@ -974,30 +977,73 @@
         const uvFolder = gui.addFolder('UV')
         props.uvButton = function() {
             baseMaterial()
-            // if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta'){
-            //     scene.traverse(function(child){
-            //         if(child.isLine) {
-            //             child.visible = false
-            //         }
-            //     })
-            //     scene.remove(matModel)
-            //     scene.remove(theModel)
-            //     scene.remove(normalModel)
-            //     scene.remove(wireModel)
-            //     scene.remove(baseModel)
-            //     scene.remove(metaModel)
-            //     scene.add(gridModel)
-            //     scene.name = 'grid'
-            // }
+            if(scene.name == 'mat' || scene.name == '' || scene.name == 'normal' || scene.name == 'wire' || scene.name == 'base' || scene.name == 'meta'){
+                scene.traverse(function(child){
+                    if(child.isLine) {
+                        child.visible = false
+                    }
+                })
+                scene.remove(matModel)
+                scene.remove(theModel)
+                scene.remove(normalModel)
+                scene.remove(wireModel)
+                scene.remove(baseModel)
+                scene.remove(metaModel)
+                scene.add(gridModel)
+                scene.name = 'grid'
+            }
             scene.remove(pointLight)
             const gridTexture = new THREE.TextureLoader().load('./vaz/uv_grid_opengl.jpg')
-            theModel.traverse(function(child) {
+            gridModel.traverse(function(child) {
                 if(child.isMesh) {
                     child.material.map = gridTexture
                 }
             })
         }
         let uvBtn = uvFolder.add(props, 'uvButton').name('UV Checker')
+
+        // 자동차 headlight setting
+        const headlight = gui.addFolder('HeadLight')
+        props.headLightButton = function() {
+            baseMaterial()
+            sceneReset()
+            scene.remove(ambientLight)
+            scene.remove(spotLight)
+            scene.remove(hemiLight)
+            scene.background = new THREE.Color(0x000000)
+
+            let floorGeometry = new THREE.PlaneGeometry(5000,5000,1,1)
+            let floorMaterial = new THREE.MeshPhongMaterial({
+                color: 0x000000
+            })
+            let floor = new THREE.Mesh(floorGeometry, floorMaterial)
+            floor.rotation.x = -2.5 * Math.PI
+            floor.receiveShadow = true
+            floor.position.y = 0
+            scene.add(floor)
+
+            let headlight1 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
+            headlight1.castShadow = true
+            headlight1.target.position.set(0,0,120)
+            headlight1.target.updateMatrixWorld()
+            headlight1.position.set(.8,1,3.2)
+            scene.add(headlight1)
+            let lightHelper = new THREE.SpotLightHelper(headlight1)
+            scene.add(lightHelper)
+
+            let headlight2 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
+            headlight2.castShadow = true
+            headlight2.target.position.set(0,0,120)
+            headlight2.target.updateMatrixWorld()
+            headlight2.position.set(-.8,1,3.2)
+            scene.add(headlight2)
+            let lightHelper2 = new THREE.SpotLightHelper(headlight2)
+            scene.add(lightHelper2)
+        }
+        let headLightBtn = headlight.add(props,'headLightButton').name('HeadLight')
+
+
+
 
         function baseMaterial() {
             theModel.traverse(function(child) {
@@ -1042,15 +1088,15 @@
 
         function animate() {
             requestAnimationFrame(animate)
-            // theModel.traverse(function(child) {
-            //     if(child.isMesh) {
-            //         if(child.material.name == 'wheels') {
-            //             child.rotation.x += .05
-            //         }
-            //     }
-            // })
-            // const time = -performance.now() / 1000
-            // grid.position.z = (time) % 1
+            theModel.traverse(function(child) {
+                if(child.isMesh) {
+                    if(child.material.name == 'wheels') {
+                        child.rotation.x += .05
+                    }
+                }
+            })
+            const time = -performance.now() / 1000
+            grid.position.z = (time) % 1
             renderer.render(scene, camera)
         }        
         animate()
