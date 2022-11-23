@@ -190,19 +190,30 @@
         }
 
 
+        // CSS2DRenderer Click Btn
         const scene2 = new THREE.Scene()
         let rendererCss = new CSS2DRenderer()
         rendererCss.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(rendererCss.domElement)
-        
+
         let el = document.createElement('div')
-        el.innerHTML = "<button> 클릭해보세요 </button>";
+        el.innerHTML = "<h1>Hello</h1>";
+        const btn = document.createElement('button')
+        btn.type = "button"
+        btn.innerHTML = '클릭'
+        btn.id = 'clickBtn'
+        btn.className = 'clickBtn'
+        el.appendChild(btn)
         let obj = new CSS2DObject(el)
-        obj.position.set(-10,0,-1000)
-        scene2.add(obj)
-
-
-
+        obj.position.set(-1300,-160,-300)
+        console.log(obj)
+        // scene2.add(obj)
+        theModel.add(obj)
+        btn.addEventListener('click',function(e) {
+            cuteLocation()
+        })
+        // Object_80    // 인형
+        
         let carBody = theModel.children[0].children[0].children[0].children[1].children[0].material.color
         // VAR 외부 color change event
         function selectSwatch(e) {
@@ -1095,7 +1106,9 @@
             const time = -performance.now() / 1000
             grid.position.z = (time) % 1
             renderer.render(scene, camera)
+            
             rendererCss.render(scene2,camera)
+            // rendererCss.render(theModel,camera)
         }        
         animate()
 

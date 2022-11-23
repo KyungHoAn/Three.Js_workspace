@@ -27,16 +27,20 @@ if(WEBGL.isWebGLAvailable()) {
     const material = new THREE.MeshBasicMaterial({ color:0xff0000 });
     const cube = new THREE.Mesh(geometry, material);
     // cube.lookAt(cam2.position)
-    scene2.add(cube);
-    console.log(scene)
+    // scene2.add(cube);
+    // console.log(scene)
 
     let el = document.createElement('div');
-    el.innerHTML = "<h1>Hello CSS3D</h1>" + "<input type=text/>"+"<button> click </button>";
+    el.innerHTML = "<h1>Hello CSS3D</h1>" + "<input type=text/>" + "<button> click </button>";
     let obj = new CSS3DObject(el);
     obj.position.set(-300,0,-1000);
     // obj.lookAt(camera.position);
     obj.rotation.y += Math.PI / 4;
     scene.add(obj);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(0,20,100);
+    controls.update();
 
     function animate() {
         renderer.render(scene,camera);

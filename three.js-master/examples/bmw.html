@@ -82,18 +82,18 @@
         // let dirLight = new THREE.DirectionalLight(0xffffff, 1.5)        // 상단
         // scene.add(dirLight)
 
-        // let dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5)    // 왼쪽
-        // dirLight1.position.x =-10
-        // scene.add(dirLight1)
+        let dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5)    // 왼쪽
+        dirLight1.position.x =-10
+        scene.add(dirLight1)
 
-        // let dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5)    // 오른쪽
-        // dirLight2.position.x =10
-        // scene.add(dirLight2)
+        let dirLight2 = new THREE.DirectionalLight(0xffffff, 1.5)    // 오른쪽
+        dirLight2.position.x =10
+        scene.add(dirLight2)
 
-        // let dirLight3 = new THREE.DirectionalLight(0xffffff, 1.5)       // 후방
-        // dirLight3.position.z =-25
-        // dirLight3.position.y =15
-        // scene.add(dirLight3)
+        let dirLight3 = new THREE.DirectionalLight(0xffffff, 1.5)       // 후방
+        dirLight3.position.z =-25
+        dirLight3.position.y =15
+        scene.add(dirLight3)
 
         // let dirLight4 = new THREE.DirectionalLight(0xffffff, 1.5)       // 전방
         // dirLight4.position.z = 25
@@ -162,10 +162,10 @@
             }
         })
 
-        const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.05)
-        dirLight2.position.set(0,-1, 0).normalize()
-        dirLight2.color.setHSL(0.1, 0.7, 0.5)
-        scene.add(dirLight2)
+        const dirLight6 = new THREE.DirectionalLight(0xffffff, 0.05)
+        dirLight6.position.set(0,-1, 0).normalize()
+        dirLight6.color.setHSL(0.1, 0.7, 0.5)
+        scene.add(dirLight6)
         
         const textureLoader = new THREE.TextureLoader()
         textureFlare0 = textureLoader.load('./vaz/lensflare0.png')
