@@ -2,7 +2,7 @@ const path = require('path')
 
 module.exports = {
   mode: 'production',
-  entry: './src/viewer3D',
+  entry: './src/CSS2D_test',
   output: {
     path: path.resolve(__dirname, 'public'),
     filename: 'bundle.js',

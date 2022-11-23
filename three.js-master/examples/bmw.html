@@ -147,11 +147,9 @@
                 if(child.material.name == 'Rubber') {        // 고무 바퀴
                 }
                 if(child.material.name == 'WhiteLights') {   // 전방 라이트 white
-                    console.log(child)
-
+                    console.log(child.material)
                 }
                 if(child.material.name == 'Plastic') {       // 전방 라이트 금속s
-
                     const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.05)
                     dirLight2.position.set(0,-1, 0).normalize()
                     dirLight2.color.setHSL(0.1, 0.7, 0.5)
@@ -183,14 +181,14 @@
             light2.add(lensflare)
         }
 
-        var headlight1 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
+        let headlight1 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
         headlight1.castShadow = true
         headlight1.target.position.set(6,0,120)
         headlight1.target.updateMatrixWorld()
         headlight1.position.set(6,7,25)
         scene.add(headlight1)
 
-        var headlight2 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
+        let headlight2 = new THREE.SpotLight(0xF2E66A, 10, 80, 4.9)
         headlight2.castShadow = true
         headlight2.target.position.set(6,0,120)
         headlight2.target.updateMatrixWorld()
