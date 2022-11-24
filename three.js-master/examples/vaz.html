@@ -119,6 +119,9 @@
                 }
                 if(child.material.name == 'headlight2') {
                 }
+                if(child.material.name == 'stuff') {        // headlight 점
+                    console.log(child.name)
+                }
                 if(child.material.name == 'signs') {
                     child.material.metalness = .6
                     child.material.specularIntensity = 1
@@ -249,11 +252,19 @@
         // // renderer2.toneMapping = THREE.LinearToneMapping
         // renderer2.toneMappingExposure = .5
 
+        let renderer1 = new THREE.WebGLRenderer({ canvas, antialias: true })
+        renderer1.setSize(window.innerWidth, window.innerHeight)
+        renderer1.shadowMap.enabled = true
+        renderer1.setPixelRatio(window.devicePixelRatio)
+        renderer1.shadowMap.type = THREE.PCFSoftShadowMap
+        document.body.appendChild(renderer1.domElement)
 
-        const lights1 = theModel.children[0].children[0].children[0].children[55]
+        // headlight 점 56, 320, 322, 324
+        console.log(scene.children[1].children[0].children[0].children[0].children[128])
+        // const lights = theModel.children[0].children[0].children[0].children[55]
         // console.log(theModel.children[0].children[0].children[0].children[55].children[0])
         // console.log(scene.children[1].children[0].children[0].children[0].children[55])
-        // const camera2 = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000)
+        // const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000)
         let renderScene = new RenderPass(scene, camera)
         let bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -262,7 +273,7 @@
             0.85
         )
 
-        let composer = new EffectComposer(renderer)
+        let composer = new EffectComposer(renderer1)
         composer.setSize(window.innerWidth, window.innerHeight)
         composer.addPass(renderScene)
         composer.addPass(bloomPass)
