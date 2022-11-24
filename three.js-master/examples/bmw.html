@@ -79,8 +79,8 @@
         let bmwModel = bmw.scene
         scene.add(bmwModel)
 
-        // let dirLight = new THREE.DirectionalLight(0xffffff, 1.5)        // 상단
-        // scene.add(dirLight)
+        let dirLight = new THREE.DirectionalLight(0xffffff, 1.5)        // 상단
+        scene.add(dirLight)
 
         let dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5)    // 왼쪽
         dirLight1.position.x =-10
@@ -93,7 +93,7 @@
         let dirLight3 = new THREE.DirectionalLight(0xffffff, 1.5)       // 후방
         dirLight3.position.z =-25
         dirLight3.position.y =15
-        scene.add(dirLight3)
+        // scene.add(dirLight3)
 
         // let dirLight4 = new THREE.DirectionalLight(0xffffff, 1.5)       // 전방
         // dirLight4.position.z = 25

@@ -21,7 +21,11 @@
                 "VertexNormalsHelper":"./jsm/helpers/VertexNormalsHelper.js",
                 "Lensflare":"./jsm/objects/Lensflare.js",
                 "Reflector":"./jsm/objects/Reflector.js",
-                "CSS2DRenderer":"./jsm/renderers/CSS2DRenderer.js"
+                "CSS2DRenderer":"./jsm/renderers/CSS2DRenderer.js",
+                "RenderPass":"./jsm/postprocessing/RenderPass.js",
+                "ShaderPass":"./jsm/postprocessing/ShaderPass.js",
+                "EffectComposer":"./jsm/postprocessing/EffectComposer.js",
+                "UnrealBloomPass":"./jsm/postprocessing/UnrealBloomPass.js"
             }
         }
     </script>
@@ -35,6 +39,10 @@
         import { VertexNormalsHelper } from 'VertexNormalsHelper'
         import {Lensflare, LensflareElement} from 'Lensflare'
         import {CSS2DRenderer, CSS2DObject} from 'CSS2DRenderer'
+        import {RenderPass} from 'RenderPass'
+        import {EffectComposer} from 'EffectComposer'
+        import {UnrealBloomPass} from 'UnrealBloomPass'
+        import {ShaderPass} from 'ShaderPass'
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -43,7 +51,7 @@
         const clock = new THREE.Clock()
         const gui = new GUI()
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+        let renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         let autoE = false
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.shadowMap.enabled = true
@@ -189,30 +197,80 @@
             swatch.addEventListener('click', selectSwatch)
         }
 
-
+        
         // CSS2DRenderer Click Btn
-        const scene2 = new THREE.Scene()
-        let rendererCss = new CSS2DRenderer()
-        rendererCss.setSize(window.innerWidth, window.innerHeight)
-        document.body.appendChild(rendererCss.domElement)
+        // const scene2 = new THREE.Scene()
+        // let rendererCss = new CSS2DRenderer()
+        // rendererCss.setSize(window.innerWidth, window.innerHeight)
+        // document.body.appendChild(rendererCss.domElement)
 
-        let el = document.createElement('div')
-        el.innerHTML = "<h1>Hello</h1>";
-        const btn = document.createElement('button')
-        btn.type = "button"
-        btn.innerHTML = '클릭'
-        btn.id = 'clickBtn'
-        btn.className = 'clickBtn'
-        el.appendChild(btn)
-        let obj = new CSS2DObject(el)
-        obj.position.set(-1300,-160,-300)
-        console.log(obj)
+        // let el = document.createElement('div')
+        // el.innerHTML = "<h1>Hello</h1>";
+        // const btn = document.createElement('button')
+        // btn.type = "button"
+        // btn.innerHTML = '클릭'
+        // btn.id = 'clickBtn'
+        // btn.className = 'clickBtn'
+        // el.appendChild(btn)
+        // let obj = new CSS2DObject(el)
+        // obj.position.set(-1300,-160,-300)
+        // // console.log(obj)
         // scene2.add(obj)
-        theModel.add(obj)
-        btn.addEventListener('click',function(e) {
-            cuteLocation()
-        })
+        // // theModel.add(obj)
+        // btn.addEventListener('click',function(e) {
+        //     cuteLocation()
+        // })
         // Object_80    // 인형
+
+
+        // // object_150 2 4   lights
+        // const renderer2 = new THREE.WebGLRenderer({ canvas, antialias: true })
+        // const camera2 = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000)
+        // console.log(theModel.children[0].children[0].children[0].children[55])
+        // const lights = theModel.children[0].children[0].children[0].children[55]
+        
+        // const renderScene = new RenderPass(lights, camera2)
+        // const composer = new EffectComposer(renderer2)
+        // composer.addPass(renderScene)
+
+        // const bloomPass = new UnrealBloomPass(
+        //     new THREE.Vector2(window.innerWidth, window.innerHeight),
+        //     1.6,
+        //     0.1,
+        //     0.1
+        // )
+        // composer.addPass(bloomPass)
+
+        // bloomPass.strength = .5
+        // bloomPass.radius = 5
+        // bloomPass.threshold = .1
+
+        // renderer2.toneMapping = THREE.CineonToneMapping
+        // // renderer2.toneMapping = THREE.LinearToneMapping
+        // renderer2.toneMappingExposure = .5
+
+
+        const lights1 = theModel.children[0].children[0].children[0].children[55]
+        // console.log(theModel.children[0].children[0].children[0].children[55].children[0])
+        // console.log(scene.children[1].children[0].children[0].children[0].children[55])
+        // const camera2 = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 1000)
+        let renderScene = new RenderPass(scene, camera)
+        let bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5,
+            0.4,
+            0.85
+        )
+
+        let composer = new EffectComposer(renderer)
+        composer.setSize(window.innerWidth, window.innerHeight)
+        composer.addPass(renderScene)
+        composer.addPass(bloomPass)
+
+ 
+
+
+
         
         let carBody = theModel.children[0].children[0].children[0].children[1].children[0].material.color
         // VAR 외부 color change event
@@ -1105,9 +1163,11 @@
             })
             const time = -performance.now() / 1000
             grid.position.z = (time) % 1
+
             renderer.render(scene, camera)
+            composer.render()
             
-            rendererCss.render(scene2,camera)
+            // rendererCss.render(scene2,camera)
             // rendererCss.render(theModel,camera)
         }        
         animate()
