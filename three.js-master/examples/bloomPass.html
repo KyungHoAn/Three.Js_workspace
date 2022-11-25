@@ -48,7 +48,8 @@
         var camera = new THREE.PerspectiveCamera(60, window.innerWidth/ window.innerHeight, 1, 10000);
         camera.position.set(-5, 5, 5);
         camera.layers.enable(1);
-        var renderer = new THREE.WebGLRenderer({antialias: true});
+        const canvas = document.querySelector('#c')
+        var renderer = new THREE.WebGLRenderer({canvas,antialias: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor( 0x101000 );
         document.body.appendChild(renderer.domElement);
