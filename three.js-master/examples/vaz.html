@@ -120,7 +120,6 @@
                 if(child.material.name == 'headlight2') {       // yellow
                 }
                 if(child.material.name == 'stuff') {            // headlight 점
-                    // console.log(child)
                 }
                 if(child.material.name == 'signs') {
                     child.material.metalness = .6
@@ -1045,6 +1044,44 @@
             headlight2.target.updateMatrixWorld()
             headlight2.position.set(-.8,1,3.2)
             scene.add(headlight2)
+
+            const params = {
+                bloomStrength: 1,
+                bloomRadius: 1,
+                bloomThreshold:1
+            }
+            const renderScene = new RenderPass(scene, camera)
+
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                params.bloomStrength,
+                params.bloomRadius,
+                params.bloomThreshold
+            )
+
+            let rt = new THREE.WebGLRenderTarget(innerWidth, innerHeight, {
+                type: THREE.FloatType,
+                encoding: THREE.sRGBEncoding,
+                minFilter: THREE.NearestFilter,
+                magFilter: THREE.NearestFilter,
+                samples: 4
+            })
+            theModel.traverse((child) => {
+                if(child.isMesh) {
+                    if(child.material.name == 'headlight1') {
+                        child.material.color.r = 255
+                        child.material.color.g = 255
+                        child.material.color.b = 255
+                    }
+                }
+            })
+            let composer = new EffectComposer(renderer, rt)
+            composer.addPass(renderScene)
+            composer.addPass(bloomPass)
+
+            renderer.setAnimationLoop(() => {
+                composer.render()
+            })
         }
         let headLightBtn = headlight.add(props,'headLightButton').name('HeadLight')
 
